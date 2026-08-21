@@ -157,10 +157,22 @@ board is empty) without the app needing to duplicate that logic.
 ### Manage-link security
 
 The raw manage-token is generated once (`lib/manage-token.ts`), handed to the
-provider exactly once (in the URL / success screen), and never stored. Only
-its SHA-256 hash lives in `listings.manage_token_hash`, so a database
-leak can't be turned into working manage-links — the same principle as
-password hashing. Lookup hashes the incoming token and matches on the hash.
+provider exactly once (in the URL / success screen). Only its SHA-256 hash
+lives in `listings.manage_token_hash`, so a database leak can't be turned
+into working manage-links — the same principle as password hashing. Lookup
+hashes the incoming token and matches on the hash.
+
+**Deliberate, explicitly-chosen exception**: `listings.manage_token_encrypted`
+also stores a *reversibly* encrypted copy (AES-256-GCM, key in
+`MANAGE_TOKEN_ENCRYPTION_KEY`), so admin can decrypt-and-copy a listing's
+current live manage link (e.g. a provider asks support for it) without
+resetting it — see "Get manage link" / "Copy current link" in `/admin/listings`.
+This is strictly weaker than the hash: a database leak *plus* that env var
+would recover every link, whereas the hash can never be reversed by anyone
+under any circumstances. Listings issued before this column existed have no
+decryptable copy until their token is next regenerated (there was never a
+raw value available to encrypt retroactively) — the admin UI falls back to
+"Get new link" (mint-and-invalidate) for those.
 
 ## Project layout
 
@@ -212,11 +224,13 @@ lib/db/admin.ts         Admin-only queries: all listings (any status) + joins, c
 app/admin/login/page.tsx                Password form
 app/admin/(dashboard)/layout.tsx        Auth gate (redirects to login) + nav
 app/admin/(dashboard)/page.tsx          Overview: revenue, counts
-app/admin/(dashboard)/listings/page.tsx Filterable listings table — unpublish, toggle Verified
+app/admin/(dashboard)/listings/page.tsx Filterable listings table — unpublish, toggle Verified, edit provider/category, manage-link tools
 app/admin/(dashboard)/categories/page.tsx Category manager — add/rename/reorder/hide
 app/admin/(dashboard)/actions.ts        Server Actions backing the admin forms above
 app/api/admin/login/route.ts            Sets the signed session cookie
 app/api/admin/logout/route.ts           Clears it
+app/api/admin/listings/[id]/manage-link/route.ts  GET decrypts the current link; POST mints+invalidates a new one
+components/admin/ManageLinkButton.tsx   "Copy current link" / "Get new link" — client component in the listings table
 
 app/rules/page.tsx                Public rules page
 app/categories/[slug]/opengraph-image.tsx  Per-category share image (MDA brand, next/og) — no separate homepage image, since / always redirects into a category

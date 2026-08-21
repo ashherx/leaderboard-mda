@@ -1,4 +1,5 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { decryptManageToken, encryptManageToken, generateManageToken, hashManageToken } from "@/lib/manage-token";
 import type { Category, Listing, PaymentStatus } from "@/lib/db/types";
 
 export interface AdminListingRow extends Listing {
@@ -77,6 +78,44 @@ export async function setListingVerified(listingId: string, verified: boolean): 
   const supabase = getSupabaseServerClient();
   const { error } = await supabase.from("listings").update({ is_verified: verified }).eq("id", listingId);
   if (error) throw error;
+}
+
+/**
+ * Decrypts a listing's current manage-token, if a decryptable copy exists.
+ * Returns null for listings issued before manage_token_encrypted existed
+ * and never since regenerated — there's nothing to decrypt for those; the
+ * admin's only option there is regenerateManageToken below.
+ */
+export async function getCurrentManageToken(listingId: string): Promise<string | null> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("listings")
+    .select("manage_token_encrypted")
+    .eq("id", listingId)
+    .single();
+  if (error) throw error;
+  if (!data.manage_token_encrypted) return null;
+
+  return decryptManageToken(data.manage_token_encrypted);
+}
+
+/**
+ * Mints a fresh manage-token for a listing and returns the raw value — for
+ * when a provider asks support for their manage link and there's no
+ * decryptable copy to fall back on (see getCurrentManageLink). This
+ * necessarily invalidates whatever link the provider already had.
+ */
+export async function regenerateManageToken(listingId: string): Promise<string> {
+  const supabase = getSupabaseServerClient();
+  const rawToken = generateManageToken();
+
+  const { error } = await supabase
+    .from("listings")
+    .update({ manage_token_hash: hashManageToken(rawToken), manage_token_encrypted: encryptManageToken(rawToken) })
+    .eq("id", listingId);
+  if (error) throw error;
+
+  return rawToken;
 }
 
 export interface ListingDetailsUpdate {

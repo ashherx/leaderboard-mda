@@ -1,5 +1,5 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { generateManageToken, hashManageToken } from "@/lib/manage-token";
+import { encryptManageToken, generateManageToken, hashManageToken } from "@/lib/manage-token";
 import type { CategoryPricing, Listing, ListingWithRank } from "@/lib/db/types";
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -84,6 +84,12 @@ export async function getCategoryStats(categoryId: string): Promise<CategoryStat
  * the provider commits to paying. This is a preview only: the real rank at
  * publish time is whatever the listing_ranks view says once the payment
  * completes, since other bids can land in the meantime.
+ *
+ * Counts listings with bid_amount_cents >= this bid (not just strictly
+ * greater): the tie-break rule in listing_ranks is claimed_at ascending, so
+ * an existing listing at the exact same amount already outranks a brand-new
+ * submission at that amount (it was claimed first). Using `gt` here would
+ * preview a rank one better than what publishing would actually produce.
  */
 export async function previewRankForBid(categoryId: string, bidAmountCents: number): Promise<number> {
   const supabase = getSupabaseServerClient();
@@ -92,7 +98,7 @@ export async function previewRankForBid(categoryId: string, bidAmountCents: numb
     .select("id", { count: "exact", head: true })
     .eq("category_id", categoryId)
     .eq("status", "published")
-    .gt("bid_amount_cents", bidAmountCents);
+    .gte("bid_amount_cents", bidAmountCents);
 
   if (error) throw error;
   return (count ?? 0) + 1;
@@ -130,6 +136,7 @@ export async function createPendingListing(
       bid_amount_cents: input.bidAmountCents,
       status: "pending_payment",
       manage_token_hash: hashManageToken(rawManageToken),
+      manage_token_encrypted: encryptManageToken(rawManageToken),
     })
     .select("*")
     .single();

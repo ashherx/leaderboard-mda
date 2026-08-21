@@ -1,6 +1,7 @@
 import { listAllListingsForAdmin, listAllCategoriesForAdmin } from "@/lib/db/admin";
 import { formatCentsAsDollars } from "@/lib/format";
 import { setVerifiedAction, unpublishListingAction, updateListingDetailsAction } from "../actions";
+import { ManageLinkButton } from "@/components/admin/ManageLinkButton";
 import type { Listing } from "@/lib/db/types";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,7 @@ export default async function AdminListingsPage({
               <th className="px-3 py-2">Status</th>
               <th className="px-3 py-2">Payment</th>
               <th className="px-3 py-2">Verified</th>
+              <th className="px-3 py-2">Manage link</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
@@ -104,6 +106,9 @@ export default async function AdminListingsPage({
                   </form>
                 </td>
                 <td className="px-3 py-2">
+                  <ManageLinkButton listingId={listing.id} />
+                </td>
+                <td className="px-3 py-2">
                   {listing.status !== "unpublished" && (
                     <form action={unpublishListingAction}>
                       <input type="hidden" name="id" value={listing.id} />
@@ -117,7 +122,7 @@ export default async function AdminListingsPage({
             ))}
             {listings.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-3 py-6 text-center text-gray-400">
+                <td colSpan={9} className="px-3 py-6 text-center text-gray-400">
                   No listings match these filters.
                 </td>
               </tr>

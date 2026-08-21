@@ -34,6 +34,7 @@ export type Listing = {
   bid_amount_cents: number;
   status: ListingStatus;
   manage_token_hash: string;
+  manage_token_encrypted: string | null;
   is_verified: boolean;
   click_count: number;
   claimed_at: string | null;
