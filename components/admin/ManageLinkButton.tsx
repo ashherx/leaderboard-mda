@@ -64,25 +64,25 @@ export function ManageLinkButton({ listingId }: { listingId: string }) {
   if (!link) {
     return (
       <div className="flex flex-col gap-0.5">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
           <button
             type="button"
             onClick={handleGetCurrent}
             disabled={loading !== null}
-            className="text-xs text-blue-600 underline disabled:opacity-60"
+            className="whitespace-nowrap text-xs text-green underline disabled:opacity-60"
           >
-            {loading === "current" ? "Fetching…" : "Copy current link"}
+            {loading === "current" ? "Fetching…" : "Copy link"}
           </button>
           <button
             type="button"
             onClick={handleGetNew}
             disabled={loading !== null}
-            className="text-xs text-blue-600 underline disabled:opacity-60"
+            className="whitespace-nowrap text-xs text-green underline disabled:opacity-60"
           >
-            {loading === "new" ? "Generating…" : "Get new link"}
+            {loading === "new" ? "Generating…" : "New link"}
           </button>
         </div>
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {error && <p className="text-xs text-brick">{error}</p>}
       </div>
     );
   }
@@ -93,9 +93,9 @@ export function ManageLinkButton({ listingId }: { listingId: string }) {
         readOnly
         value={link}
         onFocus={(e) => e.currentTarget.select()}
-        className="w-40 truncate rounded border border-gray-300 px-1.5 py-0.5 text-[10px] text-gray-700"
+        className="w-0 min-w-0 flex-1 truncate rounded-md border border-border px-1.5 py-0.5 text-[10px] text-slate"
       />
-      <button type="button" onClick={handleCopy} className="text-xs text-blue-600 underline">
+      <button type="button" onClick={handleCopy} className="shrink-0 whitespace-nowrap text-xs text-green underline">
         {copied ? "Copied" : "Copy"}
       </button>
     </div>

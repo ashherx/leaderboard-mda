@@ -31,22 +31,26 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main style={{ fontFamily: "system-ui, sans-serif" }} className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
-      <h1 className="text-lg font-semibold text-gray-900">Admin</h1>
-      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center bg-canvas px-4">
+      <h1 className="font-display text-2xl font-bold text-ink">The Podium</h1>
+      <p className="mt-1 text-sm text-slate">Admin sign in</p>
+      <form
+        onSubmit={handleSubmit}
+        className="mt-6 flex flex-col gap-3 rounded-xl border border-border bg-white p-6"
+      >
         <input
           type="password"
           autoFocus
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded border border-gray-300 px-3 py-2 text-gray-900 outline-none focus:border-gray-500"
+          className="rounded-md border border-border px-3 py-2 text-ink outline-none focus:border-gold"
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-brick">{error}</p>}
         <button
           type="submit"
           disabled={submitting}
-          className="rounded bg-gray-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-md bg-ink px-3 py-2 font-display text-sm font-semibold text-white transition-colors hover:bg-green disabled:opacity-60"
         >
           {submitting ? "Signing in…" : "Sign in"}
         </button>
