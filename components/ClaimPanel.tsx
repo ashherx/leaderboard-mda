@@ -95,9 +95,15 @@ export function ClaimPanel({
           placeholder="Your site or portfolio link"
           className="flex-1 rounded-md border border-border bg-white px-4 py-2.5 text-ink outline-none focus:border-green"
         />
+        {/* flex + items-center + leading-none, not text-align/line-height:
+            Bricolage Grotesque's line box reserves more space below the
+            glyphs than above, so centering via line-height alone left the
+            text sitting visibly high — flex-centering the tightened glyph
+            box (leading-none removes the extra reserved leading) actually
+            centers it. */}
         <a
           href={claimHref}
-          className="shrink-0 rounded-md bg-ink px-6 py-2.5 text-center font-display text-sm font-semibold text-white transition-colors hover:bg-green"
+          className="flex shrink-0 items-center justify-center rounded-md bg-ink px-6 py-2.5 font-display text-sm font-semibold leading-none text-white transition-colors hover:bg-green"
         >
           Claim #{previewRank}
         </a>

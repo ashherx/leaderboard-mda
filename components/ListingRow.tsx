@@ -1,6 +1,7 @@
 import { formatCentsAsDollars, formatTimeSince } from "@/lib/format";
 import type { ListingWithRank } from "@/lib/db/types";
-import { ReportListingLink } from "@/components/ReportListingLink";
+// "Report this listing" is turned off for now — see the commented-out usage below.
+// import { ReportListingLink } from "@/components/ReportListingLink";
 
 // Opacity steps down by rank, but stays high enough (80/60%) that white text
 // keeps working — a lighter tint (like the old /15-/30 range) would leave
@@ -43,8 +44,15 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
         )}
 
         {listing.logo_url ? (
+          // object-contain (not cover) + a padded canvas backing, so a
+          // non-square logo (e.g. a wide wordmark-style mark) doesn't get
+          // cropped to fill the circle.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={listing.logo_url} alt="" className="h-14 w-14 shrink-0 rounded-full object-cover" />
+          <img
+            src={listing.logo_url}
+            alt=""
+            className="h-14 w-14 shrink-0 rounded-full bg-canvas object-contain p-2"
+          />
         ) : (
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-canvas font-display text-lg text-slate">
             {listing.provider_name.charAt(0).toUpperCase()}
@@ -74,9 +82,13 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
         </span>
       </a>
 
+      {/* "Report this listing" is turned off for now — component/API/table
+          are all still intact, just not rendered. Re-add the div below to
+          bring it back:
       <div className={`mt-2 ${isTopThree ? "ml-14" : "ml-18"}`}>
         <ReportListingLink listingId={listing.id} />
       </div>
+      */}
     </li>
   );
 }

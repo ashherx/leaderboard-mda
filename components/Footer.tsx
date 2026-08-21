@@ -11,7 +11,7 @@ export function Footer() {
           <img
             src="/the-podium-logo-2.svg"
             alt=""
-            className="absolute inset-0 h-full w-full scale-125 object-contain"
+            className="absolute inset-0 h-full w-full scale-100 object-contain"
           />
         </span>
         <span className="text-xs text-slate">The Podium, by Million Dollar Agency</span>

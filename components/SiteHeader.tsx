@@ -17,7 +17,7 @@ export function SiteHeader() {
             <img
               src="/the-podium-logo-2.svg"
               alt=""
-              className="absolute inset-0 h-full w-full scale-125 object-contain"
+              className="absolute inset-0 h-full w-full scale-100 object-contain"
             />
           </span>
           <span className="font-display text-lg font-bold text-ink">The Podium</span>
