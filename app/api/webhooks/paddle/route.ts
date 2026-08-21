@@ -31,7 +31,16 @@ export async function POST(request: Request) {
   }
 
   if (event?.eventType === EventName.TransactionCompleted) {
-    await completePaddlePayment(event.data.id);
+    // The amount actually charged (event.data.details.totals.total) is only
+    // the re-bid top-up, not the listing's final bid — the real target came
+    // along for the ride in custom_data when the transaction was created
+    // (see createBidTransaction).
+    const targetBidAmountCents = Number(event.data.customData?.targetBidAmountCents);
+    if (!Number.isFinite(targetBidAmountCents) || targetBidAmountCents <= 0) {
+      console.error("Paddle transaction.completed missing/invalid targetBidAmountCents in custom_data:", event.data.id);
+    } else {
+      await completePaddlePayment(event.data.id, targetBidAmountCents);
+    }
   }
 
   // Paddle retries on non-2xx — always 200 once verified, even for event

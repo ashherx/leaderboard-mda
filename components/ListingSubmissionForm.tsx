@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getPaddleInstance } from "@/lib/paddle/client";
+import { PaymentDisclaimer } from "@/components/PaymentDisclaimer";
 
 const PITCH_MAX_LENGTH = 140;
 
@@ -238,6 +239,8 @@ export function ListingSubmissionForm({
       </div>
 
       {error && <p className="rounded-md border border-border px-3 py-2 text-sm text-red-600">{error}</p>}
+
+      <PaymentDisclaimer />
 
       <button
         type="submit"

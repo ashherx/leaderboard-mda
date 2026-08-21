@@ -44,13 +44,25 @@ function validateListingContent(
  * from the Paddle webhook (app/api/webhooks/paddle/route.ts) once the
  * transaction actually completes. Returns the transaction id for the client
  * to open Paddle Checkout against.
+ *
+ * chargeAmountCents and targetBidAmountCents differ for a re-bid: Paddle only
+ * charges the top-up difference, but the listing's bid should end up at the
+ * full new amount — see rebidListingViaToken.
  */
-async function startPaddleCheckout(listingId: string, amountCents: number, description: string): Promise<string> {
-  const payment = await createPendingPayment(listingId, amountCents, "paddle");
+async function startPaddleCheckout(
+  listingId: string,
+  chargeAmountCents: number,
+  targetBidAmountCents: number,
+  name: string,
+  description: string
+): Promise<string> {
+  const payment = await createPendingPayment(listingId, chargeAmountCents, "paddle");
   const transactionId = await createBidTransaction({
     listingId,
     paymentId: payment.id,
-    amountCents,
+    chargeAmountCents,
+    targetBidAmountCents,
+    name,
     description,
   });
   await attachProviderPaymentId(payment.id, transactionId);
@@ -58,10 +70,10 @@ async function startPaddleCheckout(listingId: string, amountCents: number, descr
 }
 
 /** Called by the Paddle webhook once a transaction completes — the only place a real (non-stub) payment actually publishes a listing. */
-export async function completePaddlePayment(transactionId: string): Promise<void> {
+export async function completePaddlePayment(transactionId: string, targetBidAmountCents: number): Promise<void> {
   const payment = await markPaymentCompleted(transactionId, "paddle");
   if (!payment) return; // Unknown transaction id, or already processed — ignore.
-  await publishListing(payment.listing_id, payment.amount_cents);
+  await publishListing(payment.listing_id, targetBidAmountCents);
 }
 
 export interface SubmitListingInput extends ListingContentInput {
@@ -101,7 +113,9 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
   const transactionId = await startPaddleCheckout(
     listing.id,
     bidAmountCents,
-    `${content.providerName} — ${category.name} listing`
+    bidAmountCents,
+    `${category.name} listing — ${content.providerName}`,
+    `New listing bid: ${content.providerName} in ${category.name}`
   );
 
   return { ok: true, listingId: listing.id, rawManageToken, transactionId, categorySlug: category.slug };
@@ -137,29 +151,35 @@ export type RebidResult = { ok: true; transactionId: string } | { ok: false; err
 
 /**
  * Re-bid via the manage-token: opens a Paddle checkout for a new payment
- * against the *existing* listing (never a duplicate). The listing's
- * bid_amount_cents/rank only change once the webhook confirms payment — the
+ * against the *existing* listing (never a duplicate). `additionalBidDollars`
+ * is a top-up amount, not a new total — the provider has already paid
+ * listing.bid_amount_cents for it, so that's exactly what Paddle charges and
+ * exactly what the listing's bid goes up by. The listing's
+ * bid_amount_cents/rank only change once the webhook confirms payment; the
  * currently live listing is untouched until then.
  */
-export async function rebidListingViaToken(rawToken: string, bidDollars: number): Promise<RebidResult> {
+export async function rebidListingViaToken(rawToken: string, additionalBidDollars: number): Promise<RebidResult> {
   const listing = await getListingByManageToken(rawToken);
   if (!listing) return { ok: false, error: "Invalid or expired link." };
 
   const category = await getCategoryById(listing.category_id);
   if (!category) return { ok: false, error: "This listing's category no longer exists." };
 
-  if (!Number.isInteger(bidDollars) || bidDollars <= 0) {
-    return { ok: false, error: "Bid must be a whole-dollar amount." };
+  if (!Number.isInteger(additionalBidDollars) || additionalBidDollars <= 0) {
+    return { ok: false, error: "Top-up amount must be a whole-dollar amount greater than $0." };
   }
-  const bidAmountCents = bidDollars * 100;
+  const chargeAmountCents = additionalBidDollars * 100;
+  const bidAmountCents = listing.bid_amount_cents + chargeAmountCents;
   if (bidAmountCents < category.min_bid_cents) {
     return { ok: false, error: `Minimum bid for this category is $${category.min_bid_cents / 100}.` };
   }
 
   const transactionId = await startPaddleCheckout(
     listing.id,
+    chargeAmountCents,
     bidAmountCents,
-    `${listing.provider_name} — ${category.name} re-bid`
+    `${category.name} re-bid top-up — ${listing.provider_name}`,
+    `Re-bid top-up: ${listing.provider_name} in ${category.name}, +$${additionalBidDollars} (from $${listing.bid_amount_cents / 100} to $${bidAmountCents / 100})`
   );
 
   return { ok: true, transactionId };
