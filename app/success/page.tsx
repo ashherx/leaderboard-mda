@@ -2,6 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { getListingByManageToken, getListingRank } from "@/lib/db/listings";
 import { getCategoryById } from "@/lib/db/categories";
+import { getPaymentByProviderPaymentId } from "@/lib/db/payments";
 import { formatCentsAsDollars } from "@/lib/format";
 import { Footer } from "@/components/Footer";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -9,7 +10,7 @@ import { PendingPaymentNotice } from "@/components/PendingPaymentNotice";
 
 export const dynamic = "force-dynamic";
 
-export default async function SuccessPage({ searchParams }: { searchParams: { token?: string } }) {
+export default async function SuccessPage({ searchParams }: { searchParams: { token?: string; txn?: string } }) {
   const token = searchParams.token;
   const listing = token ? await getListingByManageToken(token) : null;
 
@@ -29,7 +30,18 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
     );
   }
 
-  const [category, rank] = await Promise.all([getCategoryById(listing.category_id), getListingRank(listing.id)]);
+  const txn = searchParams.txn;
+  const [category, rank, watchedPayment] = await Promise.all([
+    getCategoryById(listing.category_id),
+    getListingRank(listing.id),
+    txn ? getPaymentByProviderPaymentId(txn) : Promise.resolve(null),
+  ]);
+
+  // On a re-bid the listing is already published — status alone can't tell
+  // this specific checkout apart from the rank it had before it. Watching
+  // the actual transaction id (when we have one) is what makes this
+  // accurate instead of showing the pre-rebid rank as if it were final.
+  const isLive = txn ? watchedPayment?.status === "completed" : listing.status === "published";
 
   const headersList = headers();
   const host = headersList.get("host");
@@ -40,7 +52,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
     <>
     <SiteHeader />
     <main className="mx-auto max-w-lg px-4 py-16">
-      {listing.status === "published" ? (
+      {isLive ? (
         <div className="rounded-xl border border-green bg-green/8 p-6 text-center">
           <p className="text-sm font-medium text-green">You&apos;re live</p>
           <p className="mt-1 font-display text-2xl font-bold text-ink">
@@ -51,7 +63,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
           </p>
         </div>
       ) : (
-        <PendingPaymentNotice token={token} />
+        <PendingPaymentNotice token={token} txn={txn} />
       )}
 
       <div className="mt-6 rounded-xl border border-gold bg-gold/8 p-5">

@@ -73,6 +73,32 @@ export async function markPaymentFailed(providerPaymentId: string, provider: str
   if (error) throw error;
 }
 
+/** Looks up one payment by the provider's transaction id — used by the success page to check whether *this specific* checkout has been confirmed yet, since an already-published listing's status alone can't tell a fresh re-bid apart from one still in flight. */
+export async function getPaymentByProviderPaymentId(providerPaymentId: string): Promise<Payment | null> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("provider_payment_id", providerPaymentId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Every payment ever attempted against a listing — initial claim, re-bids, failures — newest first. Shown on the manage page as an audit trail. */
+export async function listPaymentsForListing(listingId: string): Promise<Payment[]> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("listing_id", listingId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
 export async function sumCompletedPaymentsCents(): Promise<number> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.from("payments").select("amount_cents").eq("status", "completed");

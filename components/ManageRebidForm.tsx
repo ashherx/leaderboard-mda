@@ -57,7 +57,9 @@ export function ManageRebidForm({
       // the success page polls for that and shows the result there.
       paddle.Checkout.open({
         transactionId: data.transactionId,
-        settings: { successUrl: `${window.location.origin}/success?token=${token}` },
+        settings: {
+          successUrl: `${window.location.origin}/success?token=${token}&txn=${encodeURIComponent(data.transactionId)}`,
+        },
       });
       setSubmitting(false);
     } catch {

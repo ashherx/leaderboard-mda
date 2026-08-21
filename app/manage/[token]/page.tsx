@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { getCategoryById } from "@/lib/db/categories";
 import { getCategoryPricing, getListingByManageToken, getListingRank } from "@/lib/db/listings";
+import { listPaymentsForListing } from "@/lib/db/payments";
 import { formatCentsAsDollars, formatTimeSince } from "@/lib/format";
 import { ManageEditForm } from "@/components/ManageEditForm";
 import { ManageRebidForm } from "@/components/ManageRebidForm";
+import { PaymentHistory } from "@/components/PaymentHistory";
 import { Footer } from "@/components/Footer";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -34,9 +36,10 @@ export default async function ManageListingPage({ params }: { params: { token: s
   }
 
   const category = await getCategoryById(listing.category_id);
-  const [rank, pricing] = await Promise.all([
+  const [rank, pricing, payments] = await Promise.all([
     getListingRank(listing.id),
     category ? getCategoryPricing(category.id, category.min_bid_cents) : null,
+    listPaymentsForListing(listing.id),
   ]);
 
   return (
@@ -91,6 +94,8 @@ export default async function ManageListingPage({ params }: { params: { token: s
           initialDestinationLink={listing.destination_link}
         />
       </div>
+
+      <PaymentHistory payments={payments} />
 
       {category && (
         <Link href={`/categories/${category.slug}`} className="mt-6 inline-block text-sm text-green hover:underline">

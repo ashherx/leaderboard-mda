@@ -107,7 +107,9 @@ export function ListingSubmissionForm({
       // fires around the same time (see PendingPaymentNotice).
       paddle.Checkout.open({
         transactionId: data.transactionId,
-        settings: { successUrl: `${window.location.origin}/success?token=${data.manageToken}` },
+        settings: {
+          successUrl: `${window.location.origin}/success?token=${data.manageToken}&txn=${encodeURIComponent(data.transactionId)}`,
+        },
       });
       setSubmitting(false);
     } catch {
