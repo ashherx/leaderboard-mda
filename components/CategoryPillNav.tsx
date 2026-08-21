@@ -12,18 +12,16 @@ export async function CategoryPillNav({ currentSlug }: { currentSlug: string }) 
   const categories = await listActiveCategories();
 
   return (
-    <nav className="-mx-4 overflow-x-auto px-4">
-      <div className="flex w-max gap-2 pb-1">
+    <nav className="-mx-4 overflow-x-auto border-b border-border px-4">
+      <div className="flex w-max gap-5">
         {categories.map((category) => {
           const isCurrent = category.slug === currentSlug;
           return (
             <Link
               key={category.id}
               href={`/categories/${category.slug}`}
-              className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
-                isCurrent
-                  ? "border-gold bg-gold/12 text-ink"
-                  : "border-border bg-white text-slate hover:border-green hover:text-green"
+              className={`shrink-0 whitespace-nowrap border-b-2 py-2 text-sm font-medium transition-colors ${
+                isCurrent ? "border-gold text-ink" : "border-transparent text-slate hover:text-ink"
               }`}
             >
               {category.name}

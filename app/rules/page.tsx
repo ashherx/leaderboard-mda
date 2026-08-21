@@ -14,7 +14,7 @@ export default function RulesPage() {
     <>
       <VisitTracker />
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-4 py-12">
+      <main className="mx-auto max-w-4xl px-4 py-12">
         <Link href="/" className="text-sm text-slate hover:text-green">
           ← Leaderboard
         </Link>
