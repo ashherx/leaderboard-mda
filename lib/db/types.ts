@@ -4,7 +4,7 @@
 
 export type ListingStatus = "pending_payment" | "published" | "unpublished";
 export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
-export type PaymentProvider = "lemon_squeezy" | "paddle" | "manual";
+export type PaymentProvider = "paddle" | "manual";
 export type ReportStatus = "open" | "reviewed" | "dismissed";
 
 // These are `type`, not `interface`, on purpose: the Database.Tables/Views

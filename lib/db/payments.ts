@@ -49,7 +49,7 @@ export async function markPaymentCompleted(providerPaymentId: string, provider: 
   return data;
 }
 
-/** Marks a specific payment row completed by its own id — used by the stub "manual" checkout in lib/checkout.ts, where there's no real provider webhook to key off of yet. */
+/** Marks a specific payment row completed by its own id — for manual/admin-driven completions that have no provider webhook to key off of (see PaymentProvider's "manual"). */
 export async function markPaymentCompletedById(paymentId: string, providerPaymentId: string): Promise<Payment> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase

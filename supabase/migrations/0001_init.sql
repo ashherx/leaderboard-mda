@@ -66,7 +66,7 @@ create table payments (
   listing_id          uuid not null references listings (id) on delete cascade,
 
   amount_cents        integer not null check (amount_cents > 0 and amount_cents % 100 = 0),
-  provider             text not null default 'manual',     -- 'lemon_squeezy' | 'paddle' | 'manual' (kept as text, not enum, so a provider swap needs no migration)
+  provider             text not null default 'manual',     -- 'paddle' | 'manual' (kept as text, not enum, so a provider swap needs no migration)
   provider_payment_id  text,                                -- checkout/order id from the payment provider, once known
   status               payment_status not null default 'pending',
 

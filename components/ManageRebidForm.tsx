@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { formatCentsAsDollars } from "@/lib/format";
+import { getPaddleInstance } from "@/lib/paddle/client";
 
 export function ManageRebidForm({
   token,
@@ -15,17 +15,14 @@ export function ManageRebidForm({
   claimFirstPriceCents: number;
   currentBidDollars: number;
 }) {
-  const router = useRouter();
   const [bidDollars, setBidDollars] = useState(String(Math.max(currentBidDollars, claimFirstPriceCents / 100)));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [newRank, setNewRank] = useState<number | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    setNewRank(null);
 
     const formData = new FormData(e.currentTarget);
 
@@ -39,9 +36,20 @@ export function ManageRebidForm({
         return;
       }
 
-      setNewRank(data.rank);
+      const paddle = await getPaddleInstance();
+      if (!paddle) {
+        setError("Payments aren't configured yet — contact the site owner.");
+        setSubmitting(false);
+        return;
+      }
+
+      // The new rank only takes effect once Paddle confirms the payment —
+      // the success page polls for that and shows the result there.
+      paddle.Checkout.open({
+        transactionId: data.transactionId,
+        settings: { successUrl: `${window.location.origin}/success?token=${token}` },
+      });
       setSubmitting(false);
-      router.refresh();
     } catch {
       setError("Network error — try again.");
       setSubmitting(false);
@@ -53,8 +61,8 @@ export function ManageRebidForm({
       <div>
         <h2 className="font-display font-semibold text-ink">Re-bid to reclaim a rank</h2>
         <p className="mt-1 text-sm text-slate">
-          Claiming #1 right now costs {formatCentsAsDollars(claimFirstPriceCents)}. Payment is stubbed for now —
-          submitting takes effect immediately.
+          Claiming #1 right now costs {formatCentsAsDollars(claimFirstPriceCents)}. Submitting opens checkout — your
+          new rank takes effect once payment completes.
         </p>
       </div>
 
@@ -72,9 +80,6 @@ export function ManageRebidForm({
       </div>
 
       {error && <p className="rounded-md border border-border px-3 py-2 text-sm text-red-600">{error}</p>}
-      {newRank !== null && (
-        <p className="rounded-md bg-green/8 px-3 py-2 text-sm text-green">Now ranked #{newRank}.</p>
-      )}
 
       <button
         type="submit"

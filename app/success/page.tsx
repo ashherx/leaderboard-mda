@@ -5,6 +5,7 @@ import { getCategoryById } from "@/lib/db/categories";
 import { formatCentsAsDollars } from "@/lib/format";
 import { Footer } from "@/components/Footer";
 import { SiteHeader } from "@/components/SiteHeader";
+import { PendingPaymentNotice } from "@/components/PendingPaymentNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -39,15 +40,19 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
     <>
     <SiteHeader />
     <main className="mx-auto max-w-lg px-4 py-16">
-      <div className="rounded-xl border border-green bg-green/8 p-6 text-center">
-        <p className="text-sm font-medium text-green">You&apos;re live</p>
-        <p className="mt-1 font-display text-2xl font-bold text-ink">
-          #{rank} in {category?.name ?? "your category"}
-        </p>
-        <p className="mt-1 text-slate">
-          {listing.provider_name} · {formatCentsAsDollars(listing.bid_amount_cents)}
-        </p>
-      </div>
+      {listing.status === "published" ? (
+        <div className="rounded-xl border border-green bg-green/8 p-6 text-center">
+          <p className="text-sm font-medium text-green">You&apos;re live</p>
+          <p className="mt-1 font-display text-2xl font-bold text-ink">
+            #{rank} in {category?.name ?? "your category"}
+          </p>
+          <p className="mt-1 text-slate">
+            {listing.provider_name} · {formatCentsAsDollars(listing.bid_amount_cents)}
+          </p>
+        </div>
+      ) : (
+        <PendingPaymentNotice token={token} />
+      )}
 
       <div className="mt-6 rounded-xl border border-gold bg-gold/8 p-5">
         <p className="font-display font-semibold text-ink">Save this link — it's the only way back in</p>

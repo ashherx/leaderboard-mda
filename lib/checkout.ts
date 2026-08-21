@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { getCategoryById, getCategoryBySlug } from "@/lib/db/categories";
 import {
   createPendingListing,
@@ -7,8 +6,9 @@ import {
   publishListing,
   updateListingContent,
 } from "@/lib/db/listings";
-import { createPendingPayment, markPaymentCompletedById } from "@/lib/db/payments";
+import { attachProviderPaymentId, createPendingPayment, markPaymentCompleted } from "@/lib/db/payments";
 import { validateDestinationLink } from "@/lib/link-policy";
+import { createBidTransaction } from "@/lib/paddle/checkout";
 
 export interface ListingContentInput {
   providerName: string;
@@ -38,16 +38,30 @@ function validateListingContent(
 }
 
 /**
- * Stands in for "redirect to checkout, then a webhook marks the payment
- * completed" — payments aren't wired up to a real provider yet. Swapping in
- * Lemon Squeezy later means replacing just this function's body with a
- * checkout redirect, and moving the publishListing() call into the webhook
- * handler; every caller below stays the same.
+ * Opens a Paddle checkout for a listing: a `pending` payment audit row plus a
+ * matching Paddle transaction, linked via provider_payment_id. The listing
+ * itself doesn't go live yet — that happens in completePaddlePayment, called
+ * from the Paddle webhook (app/api/webhooks/paddle/route.ts) once the
+ * transaction actually completes. Returns the transaction id for the client
+ * to open Paddle Checkout against.
  */
-async function runStubPaymentAndPublish(listingId: string, amountCents: number): Promise<void> {
-  const payment = await createPendingPayment(listingId, amountCents, "manual");
-  await markPaymentCompletedById(payment.id, `manual-${randomUUID()}`);
-  await publishListing(listingId, amountCents);
+async function startPaddleCheckout(listingId: string, amountCents: number, description: string): Promise<string> {
+  const payment = await createPendingPayment(listingId, amountCents, "paddle");
+  const transactionId = await createBidTransaction({
+    listingId,
+    paymentId: payment.id,
+    amountCents,
+    description,
+  });
+  await attachProviderPaymentId(payment.id, transactionId);
+  return transactionId;
+}
+
+/** Called by the Paddle webhook once a transaction completes — the only place a real (non-stub) payment actually publishes a listing. */
+export async function completePaddlePayment(transactionId: string): Promise<void> {
+  const payment = await markPaymentCompleted(transactionId, "paddle");
+  if (!payment) return; // Unknown transaction id, or already processed — ignore.
+  await publishListing(payment.listing_id, payment.amount_cents);
 }
 
 export interface SubmitListingInput extends ListingContentInput {
@@ -56,10 +70,10 @@ export interface SubmitListingInput extends ListingContentInput {
 }
 
 export type SubmitListingResult =
-  | { ok: true; listingId: string; rawManageToken: string; rank: number; categorySlug: string }
+  | { ok: true; listingId: string; rawManageToken: string; transactionId: string; categorySlug: string }
   | { ok: false; error: string };
 
-/** Creates a new listing + payment and takes it live. */
+/** Creates a new listing in pending_payment status and opens a Paddle checkout for it. It goes live once Paddle's webhook confirms payment. */
 export async function submitListingAndCheckout(input: SubmitListingInput): Promise<SubmitListingResult> {
   const category = await getCategoryBySlug(input.categorySlug);
   if (!category) return { ok: false, error: "Category not found." };
@@ -84,17 +98,13 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
     bidAmountCents,
   });
 
-  await runStubPaymentAndPublish(listing.id, bidAmountCents);
+  const transactionId = await startPaddleCheckout(
+    listing.id,
+    bidAmountCents,
+    `${content.providerName} — ${category.name} listing`
+  );
 
-  const rank = await getListingRank(listing.id);
-  if (rank === null) {
-    // Shouldn't happen — runStubPaymentAndPublish just set status to
-    // 'published' — but fail loudly rather than send the provider to a
-    // broken success page.
-    return { ok: false, error: "Listing was created but its rank couldn't be determined. Contact support." };
-  }
-
-  return { ok: true, listingId: listing.id, rawManageToken, rank, categorySlug: category.slug };
+  return { ok: true, listingId: listing.id, rawManageToken, transactionId, categorySlug: category.slug };
 }
 
 export type ManageActionResult =
@@ -123,12 +133,15 @@ export async function editListingViaToken(
   return { ok: true, rank };
 }
 
+export type RebidResult = { ok: true; transactionId: string } | { ok: false; error: string };
+
 /**
- * Re-bid via the manage-token: a new payment against the *existing* listing
- * (never a duplicate), which then takes over its bid_amount_cents and
- * publishes/republishes it at whatever rank that new amount earns.
+ * Re-bid via the manage-token: opens a Paddle checkout for a new payment
+ * against the *existing* listing (never a duplicate). The listing's
+ * bid_amount_cents/rank only change once the webhook confirms payment — the
+ * currently live listing is untouched until then.
  */
-export async function rebidListingViaToken(rawToken: string, bidDollars: number): Promise<ManageActionResult> {
+export async function rebidListingViaToken(rawToken: string, bidDollars: number): Promise<RebidResult> {
   const listing = await getListingByManageToken(rawToken);
   if (!listing) return { ok: false, error: "Invalid or expired link." };
 
@@ -143,8 +156,11 @@ export async function rebidListingViaToken(rawToken: string, bidDollars: number)
     return { ok: false, error: `Minimum bid for this category is $${category.min_bid_cents / 100}.` };
   }
 
-  await runStubPaymentAndPublish(listing.id, bidAmountCents);
+  const transactionId = await startPaddleCheckout(
+    listing.id,
+    bidAmountCents,
+    `${listing.provider_name} — ${category.name} re-bid`
+  );
 
-  const rank = await getListingRank(listing.id);
-  return { ok: true, rank };
+  return { ok: true, transactionId };
 }

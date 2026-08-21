@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     ok: true,
     listingId: result.listingId,
     manageToken: result.rawManageToken,
-    rank: result.rank,
+    transactionId: result.transactionId,
     categorySlug: result.categorySlug,
   });
 }

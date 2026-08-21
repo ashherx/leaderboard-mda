@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { getPaddleInstance } from "@/lib/paddle/client";
 
 const PITCH_MAX_LENGTH = 140;
 
@@ -25,7 +25,6 @@ export function ListingSubmissionForm({
   initialBidDollars: number;
   initialDestinationLink?: string;
 }) {
-  const router = useRouter();
   const [destinationLink, setDestinationLink] = useState(initialDestinationLink ?? "");
   const [providerName, setProviderName] = useState("");
   const [pitch, setPitch] = useState("");
@@ -95,7 +94,21 @@ export function ListingSubmissionForm({
         return;
       }
 
-      router.push(`/success?token=${data.manageToken}`);
+      const paddle = await getPaddleInstance();
+      if (!paddle) {
+        setError("Payments aren't configured yet — contact the site owner.");
+        setSubmitting(false);
+        return;
+      }
+
+      // Paddle redirects the browser to the success page itself once the
+      // checkout completes — the listing goes live from the webhook that
+      // fires around the same time (see PendingPaymentNotice).
+      paddle.Checkout.open({
+        transactionId: data.transactionId,
+        settings: { successUrl: `${window.location.origin}/success?token=${data.manageToken}` },
+      });
+      setSubmitting(false);
     } catch {
       setError("Network error — try again.");
       setSubmitting(false);
