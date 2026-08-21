@@ -3,31 +3,36 @@
 import { useEffect, useState } from "react";
 import { formatCentsAsDollars } from "@/lib/format";
 
+const STEP_DOLLARS = 1;
+
 export function ClaimPanel({
   slug,
   minBidCents,
+  currentTopCents,
   claimFirstPriceCents,
 }: {
   slug: string;
   minBidCents: number;
+  currentTopCents: number | null;
   claimFirstPriceCents: number;
 }) {
   const minDollars = minBidCents / 100;
+  const currentTopDollars = currentTopCents === null ? null : currentTopCents / 100;
   const claimFirstDollars = claimFirstPriceCents / 100;
 
-  const [customBid, setCustomBid] = useState(String(claimFirstDollars));
-  const [previewRank, setPreviewRank] = useState<number | null>(null);
-  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [bidDollars, setBidDollars] = useState(claimFirstDollars);
+  const [previewRank, setPreviewRank] = useState(1);
+  const [link, setLink] = useState("");
 
+  // If this bid would take #1 outright, the rank is known without a round
+  // trip (nothing can currently outrank it). Only ambiguous bids — below
+  // the current #1 — need the preview API, and even then debounced.
   useEffect(() => {
-    const bidDollars = Number(customBid);
-    if (!Number.isFinite(bidDollars) || !Number.isInteger(bidDollars) || bidDollars < minDollars) {
-      setPreviewRank(null);
-      setPreviewError(bidDollars > 0 ? `Minimum bid is $${minDollars}` : null);
+    if (currentTopDollars === null || bidDollars > currentTopDollars) {
+      setPreviewRank(1);
       return;
     }
 
-    setPreviewError(null);
     const controller = new AbortController();
     const timeout = setTimeout(() => {
       fetch(`/api/categories/${slug}/preview-rank?bid=${bidDollars}`, { signal: controller.signal })
@@ -38,64 +43,64 @@ export function ClaimPanel({
         .catch(() => {
           /* aborted or transient — leave last known preview in place */
         });
-    }, 300);
+    }, 250);
 
     return () => {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [customBid, slug, minDollars]);
+  }, [bidDollars, currentTopDollars, slug]);
 
-  const bidDollarsForLink = Math.max(minDollars, Math.floor(Number(customBid) || 0));
+  function adjust(delta: number) {
+    setBidDollars((current) => Math.max(minDollars, current + delta));
+  }
+
+  const claimHref = `/categories/${slug}/claim?amount=${bidDollars}${link ? `&link=${encodeURIComponent(link)}` : ""}`;
 
   return (
-    <div className="rounded-xl border border-gold bg-gold/8 p-5">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm text-slate">Claim the #1 spot in this category</p>
-          <p className="font-mono text-3xl font-bold text-ink">{formatCentsAsDollars(claimFirstPriceCents)}</p>
+    <div className="text-center">
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <span className="font-display text-3xl font-bold text-ink sm:text-4xl">Claim #{previewRank} for</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => adjust(-STEP_DOLLARS)}
+            aria-label="Decrease bid"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/12 text-lg font-semibold text-ink transition-colors hover:bg-gold/20"
+          >
+            −
+          </button>
+          <span className="font-mono text-3xl font-bold text-gold sm:text-4xl">{formatCentsAsDollars(bidDollars * 100)}</span>
+          <button
+            type="button"
+            onClick={() => adjust(STEP_DOLLARS)}
+            aria-label="Increase bid"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/12 text-lg font-semibold text-ink transition-colors hover:bg-gold/20"
+          >
+            +
+          </button>
         </div>
-        <a
-          href={`/categories/${slug}/claim?amount=${claimFirstDollars}`}
-          className="rounded-md bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green"
-        >
-          Claim #1 for {formatCentsAsDollars(claimFirstPriceCents)}
-        </a>
       </div>
 
-      <div className="mt-4 border-t border-gold/40 pt-4">
-        <label htmlFor="custom-bid" className="text-sm text-slate">
-          Or try a lower bid to see what rank it claims right now
-        </label>
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          <div className="flex items-center rounded-md border border-border bg-white px-3 py-1.5">
-            <span className="font-mono text-ink">$</span>
-            <input
-              id="custom-bid"
-              type="number"
-              min={minDollars}
-              step={1}
-              value={customBid}
-              onChange={(e) => setCustomBid(e.target.value)}
-              className="w-24 bg-transparent font-mono text-ink outline-none"
-            />
-          </div>
-          {previewError && <span className="text-sm text-brick">{previewError}</span>}
-          {!previewError && previewRank !== null && (
-            <span className="text-sm text-slate">
-              Would currently rank{" "}
-              <span className="font-mono font-semibold text-ink">
-                #{previewRank}
-              </span>
-            </span>
-          )}
-          <a
-            href={`/categories/${slug}/claim?amount=${bidDollarsForLink}`}
-            className="ml-auto rounded-md border border-border bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-green hover:text-green"
-          >
-            Claim at this bid
-          </a>
-        </div>
+      <p className="mx-auto mt-3 max-w-md text-sm text-slate">
+        <span className="font-medium text-ink">New spots start at ${minDollars}.</span> Paying less than the #1
+        price still puts you on the board at whatever rank that bid can take.
+      </p>
+
+      <div className="mx-auto mt-5 flex max-w-xl flex-col gap-2 sm:flex-row">
+        <input
+          type="text"
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          placeholder="Your site or portfolio link"
+          className="flex-1 rounded-md border border-border bg-white px-4 py-2.5 text-ink outline-none focus:border-green"
+        />
+        <a
+          href={claimHref}
+          className="shrink-0 rounded-md bg-ink px-6 py-2.5 text-center font-display text-sm font-semibold text-white transition-colors hover:bg-green"
+        >
+          Claim #{previewRank}
+        </a>
       </div>
     </div>
   );

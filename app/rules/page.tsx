@@ -2,9 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "Rules — Agency Bid Leaderboard",
+  title: "Rules",
   description: "How ranking works, what's allowed, and what claims a spot.",
 };
 
@@ -12,9 +13,10 @@ export default function RulesPage() {
   return (
     <>
       <VisitTracker />
+      <SiteHeader />
       <main className="mx-auto max-w-2xl px-4 py-12">
         <Link href="/" className="text-sm text-slate hover:text-green">
-          ← All categories
+          ← Leaderboard
         </Link>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink">Rules</h1>
         <p className="mt-2 text-slate">Short version: highest payment wins. Here's the rest.</p>

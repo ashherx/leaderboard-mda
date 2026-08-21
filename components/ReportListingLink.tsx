@@ -23,7 +23,7 @@ export function ReportListingLink({ listingId }: { listingId: string }) {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="text-xs text-slate underline hover:text-brick">
+      <button type="button" onClick={() => setOpen(true)} className="text-xs text-slate underline hover:text-red-600">
         Report this listing
       </button>
     );
@@ -65,7 +65,7 @@ export function ReportListingLink({ listingId }: { listingId: string }) {
         <button
           type="submit"
           disabled={submitting}
-          className="rounded bg-brick px-3 py-1 text-xs font-medium text-white disabled:opacity-60"
+          className="rounded border border-border px-3 py-1 text-xs font-medium text-red-600 disabled:opacity-60"
         >
           {submitting ? "Sending…" : "Submit report"}
         </button>

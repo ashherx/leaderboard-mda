@@ -4,6 +4,7 @@ import { getListingByManageToken, getListingRank } from "@/lib/db/listings";
 import { getCategoryById } from "@/lib/db/categories";
 import { formatCentsAsDollars } from "@/lib/format";
 import { Footer } from "@/components/Footer";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +14,17 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
 
   if (!listing || !token) {
     return (
-      <main className="mx-auto max-w-lg px-4 py-16 text-center">
-        <p className="font-display text-xl font-semibold text-ink">Nothing to show here</p>
-        <p className="mt-2 text-slate">This link is missing or invalid.</p>
-        <Link href="/" className="mt-6 inline-block text-sm text-green hover:underline">
-          ← Back to the leaderboard
-        </Link>
-      </main>
+      <>
+        <SiteHeader />
+        <main className="mx-auto max-w-lg px-4 py-16 text-center">
+          <p className="font-display text-xl font-semibold text-ink">Nothing to show here</p>
+          <p className="mt-2 text-slate">This link is missing or invalid.</p>
+          <Link href="/" className="mt-6 inline-block text-sm text-green hover:underline">
+            ← Back to the leaderboard
+          </Link>
+        </main>
+        <Footer />
+      </>
     );
   }
 
@@ -32,6 +37,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
 
   return (
     <>
+    <SiteHeader />
     <main className="mx-auto max-w-lg px-4 py-16">
       <div className="rounded-xl border border-green bg-green/8 p-6 text-center">
         <p className="text-sm font-medium text-green">You&apos;re live</p>
@@ -43,7 +49,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
         </p>
       </div>
 
-      <div className="mt-6 rounded-xl border border-brick bg-brick/8 p-5">
+      <div className="mt-6 rounded-xl border border-gold bg-gold/8 p-5">
         <p className="font-display font-semibold text-ink">Save this link — it's the only way back in</p>
         <p className="mt-1 text-sm text-slate">
           There are no accounts. This private link is the only way to edit your listing or re-bid to reclaim a

@@ -21,3 +21,11 @@ export async function countRecentVisitors(): Promise<number> {
   if (error) throw error;
   return count ?? 0;
 }
+
+/** Total distinct visitors ever — session_id is the primary key, so one row per visitor already; this is just a full count, not a time-windowed one. */
+export async function countTotalVisitors(): Promise<number> {
+  const supabase = getSupabaseServerClient();
+  const { count, error } = await supabase.from("site_visits").select("session_id", { count: "exact", head: true });
+  if (error) throw error;
+  return count ?? 0;
+}

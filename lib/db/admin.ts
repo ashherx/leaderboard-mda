@@ -79,6 +79,29 @@ export async function setListingVerified(listingId: string, verified: boolean): 
   if (error) throw error;
 }
 
+export interface ListingDetailsUpdate {
+  providerName?: string;
+  categoryId?: string;
+}
+
+/**
+ * Reassigning category_id is enough on its own — rank is derived purely
+ * from bid_amount_cents within category_id (see the listing_ranks view), so
+ * moving a listing to a new category just makes it compete in that
+ * category's ranking on the next read. No separate re-rank step needed.
+ */
+export async function updateListingDetails(listingId: string, update: ListingDetailsUpdate): Promise<void> {
+  const supabase = getSupabaseServerClient();
+  const { error } = await supabase
+    .from("listings")
+    .update({
+      ...(update.providerName !== undefined ? { provider_name: update.providerName } : {}),
+      ...(update.categoryId !== undefined ? { category_id: update.categoryId } : {}),
+    })
+    .eq("id", listingId);
+  if (error) throw error;
+}
+
 /** All categories, including hidden ones — for the admin category manager. */
 export async function listAllCategoriesForAdmin(): Promise<Category[]> {
   const supabase = getSupabaseServerClient();

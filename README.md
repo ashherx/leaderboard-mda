@@ -1,9 +1,9 @@
-# Agency Bid Leaderboard
+# The Podium
 
-Pay-to-rank public leaderboard for service providers. Visitors browse category-scoped
-leaderboards; a provider's rank within a category is purely a function of how much
-they've paid. No accounts — a payment issues a private "manage my listing" link,
-which is the only auth in the system.
+By Million Dollar Agency. Pay-to-rank public leaderboard for service providers.
+Visitors browse category-scoped leaderboards; a provider's rank within a category
+is purely a function of how much they've paid. No accounts — a payment issues a
+private "manage my listing" link, which is the only auth in the system.
 
 ## Status
 
@@ -47,11 +47,48 @@ a "Report this listing" link on every row storing to a `reports` table (no
 moderation UI yet, by design — matches the blueprint's Phase 2 scope, but
 the queue exists and is reviewable via the Supabase dashboard); a sitewide
 "X here right now" visitor counter (a lightweight upserted-cookie table, no
-websockets); per-category Open Graph share images plus a homepage one, both
-rendered with the MDA brand palette via `next/og`; and a mobile pass on the
-listing row and manage-page layouts. All verified live: the visitor counter
-incremented on a real ping, an invalid report reason was rejected, both OG
-images render as real PNGs.
+websockets); per-category Open Graph share images rendered with the MDA
+brand palette via `next/og`; and a mobile pass on the listing row and
+manage-page layouts.
+
+**Post-launch redesign**: there's no separate homepage grid of categories
+anymore. The category leaderboard page — with a pill nav across the top to
+switch between categories in one click — is the single canonical page type;
+`/` just redirects to the first category by `display_order`. Rank stays
+strictly per-category (never merged into one cross-category list): mixing
+bids across categories would make "#1 in Marketing" read as "outranked by
+anyone in any category who paid more," which undercuts the pitch to a niche
+agency that isn't competing dollar-for-dollar with a bigger-budget category.
+The pill nav is what makes that separation feel like a switch, not a wall.
+Listing rows were also redesigned denser (divided list, price as a
+gold-tiered pill for top 3) to match that reference look. All verified
+live: `/` redirects to the first category and renders it correctly with the
+pill nav highlighting the current one, the visitor counter incremented on a
+real ping, an invalid report reason was rejected, the OG image renders as a
+real PNG.
+
+**outbid.lol-style hero, with two real (not fabricated) activity panels**:
+- A stats pill (`components/StatsPill.tsx`): "N online" (15-minute window,
+  same table as before) and "M visitors since launch" (a plain count — every
+  row in `site_visits` is already one distinct visitor, since `session_id`
+  is the primary key).
+- The claim hero (`components/ClaimPanel.tsx`) is now "Claim #N for [−] $X
+  [+]" with steppers, plus a quick-capture link input that prefills the full
+  submission form's destination link (the form itself still collects
+  name/pitch/link/bid together — unlike outbid's single-field flow, a
+  "genuine service provider" listing needs more than a URL to be legible).
+  Rank shown updates live: bids at or above the current #1 resolve to #1
+  with no round trip (nothing can outrank them), anything lower debounces
+  through the existing preview-rank endpoint.
+- **Trending right now** and **Latest activity** are real, not relabeled
+  totals: a new `click_events` table (timestamped, one row per click,
+  alongside the existing running-total `click_count`) drives an honest
+  "clicks in the last hour" trending panel; latest activity is derived from
+  real completed `payments` rows. Verified live end-to-end: 4 real
+  test clicks showed up as "4 clicks/h", a real submission showed up in
+  Latest Activity as "at #4" with the correct elapsed time — then all test
+  clicks/visits/listings were cleaned up and the one demo listing's
+  `click_count` was restored to its original seeded value.
 
 A handful of demo listings (`(Demo)` in the name) are seeded via
 `supabase/migrations/0004_demo_listings.sql` purely to exercise ranking and
@@ -138,14 +175,20 @@ lib/supabase/client.ts       Browser-safe client (anon key, reads only)
 lib/manage-token.ts          Manage-token generation/hashing
 lib/format.ts                $ and relative-time formatting helpers
 
-app/page.tsx                          Homepage — all categories, sitewide stats
-app/categories/[slug]/page.tsx        Category leaderboard (rank, pagination, claim CTA)
+app/page.tsx                          Redirects to the first category by display_order — no separate homepage
+app/categories/[slug]/page.tsx        Category leaderboard (rank, pagination, claim CTA) — the canonical page type
 app/api/categories/[slug]/preview-rank/route.ts  "What rank would $X claim?" for the bid-preview input
 app/r/[id]/route.ts                   Click-through redirect (counts a click, then 302s to destination_link)
 
-components/ListingRow.tsx            One leaderboard row — rank badge, gold styling for top 3
+components/SiteHeader.tsx      Slim top bar (wordmark + Leaderboard/Rules) — added per public page, not the root layout
+components/CategoryPillNav.tsx Switch between categories from any category page, current one highlighted
+components/StatsPill.tsx       "N online · M visitors since launch"
+components/TrendingPanel.tsx    Real "clicks in the last hour" per listing, from click_events
+components/LatestActivityPanel.tsx  Recent claims/re-bids in this category, from completed payments
+lib/db/activity.ts             click_events + trending/latest-activity queries
+
+components/ListingRow.tsx            One leaderboard row — dense/divided-list style, gold price pill for top 3
 components/ClaimPanel.tsx            "Claim #1 for $X" + custom-bid rank preview (client component)
-components/CategoryCard.tsx          Homepage category tile
 components/Pagination.tsx            Prev/next page links
 components/ListingSubmissionForm.tsx Submission form (client component) — posts to /api/listings
 
@@ -176,8 +219,7 @@ app/api/admin/login/route.ts            Sets the signed session cookie
 app/api/admin/logout/route.ts           Clears it
 
 app/rules/page.tsx                Public rules page
-app/opengraph-image.tsx           Homepage share image (MDA brand, next/og)
-app/categories/[slug]/opengraph-image.tsx  Per-category share image
+app/categories/[slug]/opengraph-image.tsx  Per-category share image (MDA brand, next/og) — no separate homepage image, since / always redirects into a category
 app/api/reports/route.ts          Stores a listing report
 app/api/visit/route.ts            Upserts the cookie-based visitor ping
 

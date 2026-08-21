@@ -78,6 +78,13 @@ export type SiteVisit = {
   last_seen: string;
 };
 
+export type ClickEvent = {
+  id: string;
+  listing_id: string;
+  category_id: string;
+  created_at: string;
+};
+
 export interface Database {
   public: {
     Tables: {
@@ -135,6 +142,25 @@ export interface Database {
         Insert: Partial<SiteVisit> & Pick<SiteVisit, "session_id">;
         Update: Partial<SiteVisit>;
         Relationships: [];
+      };
+      click_events: {
+        Row: ClickEvent;
+        Insert: Partial<ClickEvent> & Pick<ClickEvent, "listing_id" | "category_id">;
+        Update: Partial<ClickEvent>;
+        Relationships: [
+          {
+            foreignKeyName: "click_events_listing_id_fkey";
+            columns: ["listing_id"];
+            referencedRelation: "listings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "click_events_category_id_fkey";
+            columns: ["category_id"];
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {

@@ -5,6 +5,7 @@ import { getCategoryPricing } from "@/lib/db/listings";
 import { ListingSubmissionForm } from "@/components/ListingSubmissionForm";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function ClaimPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { amount?: string };
+  searchParams: { amount?: string; link?: string };
 }) {
   const category = await getCategoryBySlug(params.slug);
   if (!category) notFound();
@@ -25,9 +26,14 @@ export default async function ClaimPage({
       ? requestedAmount
       : pricing.claimFirstPriceCents / 100;
 
+  // From the hero's quick-capture input, if the visitor filled it in there —
+  // just a convenience prefill, still fully editable on this form.
+  const initialDestinationLink = searchParams.link ?? "";
+
   return (
     <>
       <VisitTracker />
+      <SiteHeader />
       <main className="mx-auto max-w-lg px-4 py-10">
         <Link href={`/categories/${category.slug}`} className="text-sm text-slate hover:text-green">
           ← Back to {category.name}
@@ -43,6 +49,7 @@ export default async function ClaimPage({
             categorySlug={category.slug}
             minBidDollars={category.min_bid_cents / 100}
             initialBidDollars={initialBidDollars}
+            initialDestinationLink={initialDestinationLink}
           />
         </div>
       </main>

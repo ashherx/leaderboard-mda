@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getCategoryBySlug } from "@/lib/db/categories";
@@ -8,6 +7,11 @@ import { Pagination } from "@/components/Pagination";
 import { ClaimPanel } from "@/components/ClaimPanel";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
+import { SiteHeader } from "@/components/SiteHeader";
+import { CategoryPillNav } from "@/components/CategoryPillNav";
+import { StatsPill } from "@/components/StatsPill";
+import { TrendingPanel } from "@/components/TrendingPanel";
+import { LatestActivityPanel } from "@/components/LatestActivityPanel";
 
 const PAGE_SIZE = 25;
 
@@ -18,9 +22,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const category = await getCategoryBySlug(params.slug);
   if (!category) return {};
 
-  const title = `${category.name} Leaderboard — Agency Bid Leaderboard`;
+  const title = `${category.name} Leaderboard`;
   const description = category.description ?? `See who's ranked #1 in ${category.name}, ranked purely by bid.`;
-  return { title, description, openGraph: { title, description } };
+  // openGraph.title doesn't inherit the root layout's title template (that
+  // only applies to the <title> tag), so the "— The Podium" suffix is
+  // spelled out here manually to keep share previews branded.
+  return { title, description, openGraph: { title: `${title} — The Podium`, description } };
 }
 
 export default async function CategoryPage({
@@ -42,42 +49,54 @@ export default async function CategoryPage({
   return (
     <>
       <VisitTracker />
-      <main className="mx-auto max-w-3xl px-4 py-10">
-      <Link href="/" className="text-sm text-slate hover:text-green">
-        ← All categories
-      </Link>
+      <SiteHeader />
+      <main className="mx-auto max-w-4xl px-4 py-8">
+        <CategoryPillNav currentSlug={category.slug} />
 
-      <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">{category.name}</h1>
-      {category.description && <p className="mt-1 text-slate">{category.description}</p>}
+        <h1 className="sr-only">{category.name} leaderboard</h1>
 
-      <div className="mt-6">
-        <ClaimPanel
-          slug={category.slug}
-          minBidCents={category.min_bid_cents}
-          claimFirstPriceCents={pricing.claimFirstPriceCents}
-        />
-      </div>
+        <div className="mt-6">
+          <StatsPill />
+        </div>
 
-      <p className="mt-6 text-sm text-slate">
-        {total} listing{total === 1 ? "" : "s"} in this category
-      </p>
+        <div className="mt-8">
+          <ClaimPanel
+            slug={category.slug}
+            minBidCents={category.min_bid_cents}
+            currentTopCents={pricing.currentTopCents}
+            claimFirstPriceCents={pricing.claimFirstPriceCents}
+          />
+        </div>
 
-      {listings.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-10 text-center">
-          <p className="font-display text-lg font-semibold text-ink">No one's claimed this category yet</p>
-          <p className="mt-1 text-sm text-slate">
-            Be the first — claim #1 for just ${pricing.claimFirstPriceCents / 100}.
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <TrendingPanel categoryId={category.id} />
+          <LatestActivityPanel categoryId={category.id} />
+        </div>
+
+        <div className="mt-10 flex items-baseline justify-between">
+          <h2 className="font-display text-lg font-semibold text-ink">{category.name}</h2>
+          <p className="text-sm text-slate">
+            {total} listing{total === 1 ? "" : "s"}
           </p>
         </div>
-      ) : (
-        <ul className="mt-4 flex flex-col gap-3">
-          {listings.map((listing) => (
-            <ListingRow key={listing.id} listing={listing} />
-          ))}
-        </ul>
-      )}
+        {category.description && <p className="mt-1 text-sm text-slate">{category.description}</p>}
 
-      <Pagination basePath={`/categories/${category.slug}`} page={page} pageSize={PAGE_SIZE} total={total} />
+        {listings.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-10 text-center">
+            <p className="font-display text-lg font-semibold text-ink">No one's claimed this category yet</p>
+            <p className="mt-1 text-sm text-slate">
+              Be the first — claim #1 for just ${pricing.claimFirstPriceCents / 100}.
+            </p>
+          </div>
+        ) : (
+          <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-white">
+            {listings.map((listing) => (
+              <ListingRow key={listing.id} listing={listing} />
+            ))}
+          </ul>
+        )}
+
+        <Pagination basePath={`/categories/${category.slug}`} page={page} pageSize={PAGE_SIZE} total={total} />
       </main>
       <Footer />
     </>

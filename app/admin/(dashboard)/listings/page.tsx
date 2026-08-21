@@ -1,6 +1,6 @@
 import { listAllListingsForAdmin, listAllCategoriesForAdmin } from "@/lib/db/admin";
 import { formatCentsAsDollars } from "@/lib/format";
-import { setVerifiedAction, unpublishListingAction } from "../actions";
+import { setVerifiedAction, unpublishListingAction, updateListingDetailsAction } from "../actions";
 import type { Listing } from "@/lib/db/types";
 
 export const dynamic = "force-dynamic";
@@ -57,8 +57,31 @@ export default async function AdminListingsPage({
           <tbody>
             {listings.map((listing) => (
               <tr key={listing.id} className="border-b border-gray-100 last:border-0">
-                <td className="px-3 py-2 font-medium">{listing.provider_name}</td>
-                <td className="px-3 py-2">{listing.categoryName}</td>
+                <td className="px-3 py-2" colSpan={2}>
+                  <form action={updateListingDetailsAction} className="flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="id" value={listing.id} />
+                    <input
+                      name="providerName"
+                      defaultValue={listing.provider_name}
+                      maxLength={80}
+                      className="w-40 rounded border border-gray-300 px-2 py-1"
+                    />
+                    <select
+                      name="categoryId"
+                      defaultValue={listing.category_id}
+                      className="rounded border border-gray-300 px-2 py-1"
+                    >
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button type="submit" className="rounded bg-gray-900 px-2 py-1 text-xs text-white">
+                      Save
+                    </button>
+                  </form>
+                </td>
                 <td className="px-3 py-2 font-mono">
                   {formatCentsAsDollars(listing.bid_amount_cents)}
                   {listing.rank !== null && ` · #${listing.rank}`}

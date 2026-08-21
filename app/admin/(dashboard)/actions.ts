@@ -3,7 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { hasValidAdminSession } from "@/lib/admin-auth";
-import { createCategory, setListingVerified, unpublishListing, updateCategory } from "@/lib/db/admin";
+import {
+  createCategory,
+  setListingVerified,
+  unpublishListing,
+  updateCategory,
+  updateListingDetails,
+} from "@/lib/db/admin";
 
 /** Every action re-checks the session itself — defense in depth beyond the layout's redirect, since Server Actions can be invoked directly. */
 function requireAdmin() {
@@ -22,6 +28,17 @@ export async function setVerifiedAction(formData: FormData) {
   const id = String(formData.get("id"));
   const verified = formData.get("verified") === "true";
   await setListingVerified(id, verified);
+  revalidatePath("/admin/listings");
+}
+
+export async function updateListingDetailsAction(formData: FormData) {
+  requireAdmin();
+  const id = String(formData.get("id"));
+  const providerName = String(formData.get("providerName") ?? "").trim();
+  const categoryId = String(formData.get("categoryId") ?? "");
+  if (!id || !providerName || providerName.length > 80 || !categoryId) return;
+
+  await updateListingDetails(id, { providerName, categoryId });
   revalidatePath("/admin/listings");
 }
 

@@ -114,7 +114,7 @@ export function ManageEditForm({
         />
       </div>
 
-      {error && <p className="rounded-md bg-brick/8 px-3 py-2 text-sm text-brick">{error}</p>}
+      {error && <p className="rounded-md border border-border px-3 py-2 text-sm text-red-600">{error}</p>}
       {saved && <p className="rounded-md bg-green/8 px-3 py-2 text-sm text-green">Saved.</p>}
 
       <button

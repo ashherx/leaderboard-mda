@@ -5,6 +5,7 @@ import { formatCentsAsDollars, formatTimeSince } from "@/lib/format";
 import { ManageEditForm } from "@/components/ManageEditForm";
 import { ManageRebidForm } from "@/components/ManageRebidForm";
 import { Footer } from "@/components/Footer";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -15,16 +16,20 @@ export default async function ManageListingPage({ params }: { params: { token: s
   // other invalid token, so this page can't be used to enumerate listings.
   if (!listing) {
     return (
-      <main className="mx-auto max-w-lg px-4 py-16 text-center">
-        <p className="font-display text-xl font-semibold text-ink">Link not found</p>
-        <p className="mt-2 text-slate">
-          This manage-listing link is invalid or has expired. If you saved it from your success page, double-check
-          you copied the whole thing.
-        </p>
-        <Link href="/" className="mt-6 inline-block text-sm text-green hover:underline">
-          ← Back to the leaderboard
-        </Link>
-      </main>
+      <>
+        <SiteHeader />
+        <main className="mx-auto max-w-lg px-4 py-16 text-center">
+          <p className="font-display text-xl font-semibold text-ink">Link not found</p>
+          <p className="mt-2 text-slate">
+            This manage-listing link is invalid or has expired. If you saved it from your success page, double-check
+            you copied the whole thing.
+          </p>
+          <Link href="/" className="mt-6 inline-block text-sm text-green hover:underline">
+            ← Back to the leaderboard
+          </Link>
+        </main>
+        <Footer />
+      </>
     );
   }
 
@@ -36,6 +41,7 @@ export default async function ManageListingPage({ params }: { params: { token: s
 
   return (
     <>
+    <SiteHeader />
     <main className="mx-auto max-w-lg px-4 py-10">
       <p className="text-sm text-slate">Manage your listing</p>
       <h1 className="mt-1 font-display text-2xl font-bold text-ink">{listing.provider_name}</h1>
