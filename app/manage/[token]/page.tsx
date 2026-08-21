@@ -42,6 +42,14 @@ export default async function ManageListingPage({ params }: { params: { token: s
     listPaymentsForListing(listing.id),
   ]);
 
+  // listing.claimed_at only ever records the *first* time this listing went
+  // live — it deliberately never moves on a re-bid (it's also the rank
+  // tie-break: whoever's held a given bid amount longest wins ties). The
+  // "Claimed" field here is about the current standing, though, so it reads
+  // off the most recent completed payment instead — payments is already
+  // newest-first.
+  const lastClaimedAt = payments.find((payment) => payment.status === "completed")?.completed_at ?? listing.claimed_at;
+
   return (
     <>
     <SiteHeader />
@@ -71,7 +79,7 @@ export default async function ManageListingPage({ params }: { params: { token: s
         </div>
         <div className="col-span-2">
           <dt className="text-slate">Claimed</dt>
-          <dd className="font-medium text-ink">{formatTimeSince(listing.claimed_at)}</dd>
+          <dd className="font-medium text-ink">{formatTimeSince(lastClaimedAt)}</dd>
         </div>
       </dl>
 
