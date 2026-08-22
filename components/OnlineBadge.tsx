@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const POLL_INTERVAL_MS = 5000;
+const POLL_INTERVAL_MS = 7000;
 
 /** Live "N online" indicator - starts from the server-rendered count, then polls every 5s. */
 export function OnlineBadge({ initialOnline }: { initialOnline: number }) {

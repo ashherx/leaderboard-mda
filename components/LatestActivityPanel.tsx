@@ -1,10 +1,8 @@
 import { Broadcast } from "@phosphor-icons/react/dist/ssr";
-import { getLatestActivity } from "@/lib/db/activity";
+import type { ActivityItem } from "@/lib/db/activity";
 import { formatTimeSince } from "@/lib/format";
 
-export async function LatestActivityPanel({ categoryId }: { categoryId: string }) {
-  const activity = await getLatestActivity(categoryId);
-
+export function LatestActivityPanel({ activity }: { activity: ActivityItem[] }) {
   return (
     <div className="rounded-xl border border-border bg-white p-3">
       <p className="flex items-center gap-1 font-display text-xs font-semibold text-ink">

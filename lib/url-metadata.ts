@@ -13,7 +13,7 @@ import { uploadFaviconBuffer } from "@/lib/storage";
  * size, bounded time.
  */
 
-const FETCH_TIMEOUT_MS = 5000;
+const FETCH_TIMEOUT_MS = 7000;
 const MAX_REDIRECTS = 3;
 const MAX_HTML_BYTES = 500_000;
 const MAX_FAVICON_BYTES = 1_000_000;

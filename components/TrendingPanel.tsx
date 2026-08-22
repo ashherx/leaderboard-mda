@@ -1,9 +1,7 @@
 import { Fire } from "@phosphor-icons/react/dist/ssr";
-import { getTrendingListings } from "@/lib/db/activity";
+import type { TrendingListing } from "@/lib/db/activity";
 
-export async function TrendingPanel({ categoryId }: { categoryId: string }) {
-  const trending = await getTrendingListings(categoryId);
-
+export function TrendingPanel({ trending }: { trending: TrendingListing[] }) {
   return (
     <div className="rounded-xl border border-border bg-white p-3">
       <p className="flex items-center gap-1 font-display text-xs font-semibold text-ink">

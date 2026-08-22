@@ -3,29 +3,42 @@
 import { useEffect, useState } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@phosphor-icons/react";
 import { formatCentsAsDollars } from "@/lib/format";
+import { CategoryDropdown } from "@/components/CategoryDropdown";
+import type { CategoryPricing } from "@/lib/db/types";
 
 const STEP_DOLLARS = 1;
 
 export function ClaimPanel({
-  slug,
-  categoryName,
-  minBidCents,
-  currentTopCents,
-  claimFirstPriceCents,
+  selectedSlug,
+  selectedCategoryName,
+  pricing,
+  categories,
+  onSelectCategory,
 }: {
-  slug: string;
-  categoryName: string;
-  minBidCents: number;
-  currentTopCents: number | null;
-  claimFirstPriceCents: number;
+  selectedSlug: string;
+  selectedCategoryName: string;
+  pricing: CategoryPricing;
+  categories: { slug: string; name: string }[];
+  onSelectCategory: (slug: string) => void;
 }) {
-  const minDollars = minBidCents / 100;
-  const currentTopDollars = currentTopCents === null ? null : currentTopCents / 100;
-  const claimFirstDollars = claimFirstPriceCents / 100;
+  const minDollars = pricing.minBidCents / 100;
+  const currentTopDollars = pricing.currentTopCents === null ? null : pricing.currentTopCents / 100;
+  const claimFirstDollars = pricing.claimFirstPriceCents / 100;
 
   const [bidDollars, setBidDollars] = useState(claimFirstDollars);
   const [previewRank, setPreviewRank] = useState(1);
   const [link, setLink] = useState("");
+
+  // Selected category changed (either via this panel's own dropdown or the
+  // CategoryTabs above it, both driving the same shared selection) - rebase
+  // the bid onto the new category's claim-first price and reset the preview.
+  useEffect(() => {
+    setBidDollars(claimFirstDollars);
+    setPreviewRank(1);
+    // Only re-run when the category itself changes, not on every pricing
+    // refresh (e.g. someone else outbidding #1 shouldn't yank your bid back).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSlug]);
 
   // If this bid would take #1 outright, the rank is known without a round
   // trip (nothing can currently outrank it). Only ambiguous bids - below
@@ -38,7 +51,7 @@ export function ClaimPanel({
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
-      fetch(`/api/categories/${slug}/preview-rank?bid=${bidDollars}`, { signal: controller.signal })
+      fetch(`/api/categories/${selectedSlug}/preview-rank?bid=${bidDollars}`, { signal: controller.signal })
         .then((res) => res.json())
         .then((data) => {
           if (data.rank) setPreviewRank(data.rank);
@@ -52,17 +65,17 @@ export function ClaimPanel({
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [bidDollars, currentTopDollars, slug]);
+  }, [bidDollars, currentTopDollars, selectedSlug]);
 
   function adjust(delta: number) {
     setBidDollars((current) => Math.max(minDollars, current + delta));
   }
 
-  const claimHref = `/categories/${slug}/claim?amount=${bidDollars}${link ? `&link=${encodeURIComponent(link)}` : ""}`;
+  const claimHref = `/claim?category=${selectedSlug}&amount=${bidDollars}${link ? `&link=${encodeURIComponent(link)}` : ""}`;
 
   return (
     <div className="text-center">
-      <p className="text-sm font-medium uppercase tracking-wide text-slate">in {categoryName}</p>
+      <p className="text-sm font-medium uppercase tracking-wide text-slate">in {selectedCategoryName}</p>
       <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
         <span className="font-display text-3xl font-bold text-ink sm:text-4xl">Claim #{previewRank} for</span>
         <div className="flex items-center gap-2">
@@ -91,7 +104,7 @@ export function ClaimPanel({
         price still puts you on the board at whatever rank that bid can take.
       </p>
 
-      <div className="mx-auto mt-5 flex max-w-xl flex-col gap-2 sm:flex-row">
+      <div className="mx-auto mt-5 flex max-w-2xl flex-col gap-2 sm:flex-row">
         <input
           type="text"
           value={link}
@@ -99,6 +112,7 @@ export function ClaimPanel({
           placeholder="Your site or portfolio link"
           className="flex-1 rounded-md border border-border bg-white px-4 py-2.5 text-ink outline-none focus:border-green"
         />
+        <CategoryDropdown categories={categories} selectedSlug={selectedSlug} onSelect={onSelectCategory} className="sm:w-72" />
         {/* flex + items-center + leading-none, not text-align/line-height:
             Bricolage Grotesque's line box reserves more space below the
             glyphs than above, so centering via line-height alone left the
