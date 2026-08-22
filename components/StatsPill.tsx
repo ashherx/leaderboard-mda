@@ -1,7 +1,20 @@
 import { countRecentVisitors, countTotalVisitors } from "@/lib/db/site-visits";
+import { countOnlineVisitorsFromVercel } from "@/lib/vercel/analytics";
+
+// Prefer Vercel's Web Analytics API for "online now"; fall back to our own
+// site_visits table if the Vercel call fails (missing env vars, API error,
+// rate limit) so the pill never breaks the page over a vanity metric.
+async function getOnlineCount(): Promise<number> {
+  try {
+    return await countOnlineVisitorsFromVercel();
+  } catch (error) {
+    console.error("Vercel Analytics online count failed, falling back to site_visits:", error);
+    return countRecentVisitors();
+  }
+}
 
 export async function StatsPill() {
-  const [online, total] = await Promise.all([countRecentVisitors(), countTotalVisitors()]);
+  const [online, total] = await Promise.all([getOnlineCount(), countTotalVisitors()]);
 
   return (
     <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-border bg-white px-4 py-1.5 text-sm text-slate">
