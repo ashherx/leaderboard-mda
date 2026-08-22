@@ -62,6 +62,7 @@ export default async function CategoryPage({
         <div className="mt-8">
           <ClaimPanel
             slug={category.slug}
+            categoryName={category.name}
             minBidCents={category.min_bid_cents}
             currentTopCents={pricing.currentTopCents}
             claimFirstPriceCents={pricing.claimFirstPriceCents}

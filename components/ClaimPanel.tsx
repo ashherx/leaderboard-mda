@@ -8,11 +8,13 @@ const STEP_DOLLARS = 1;
 
 export function ClaimPanel({
   slug,
+  categoryName,
   minBidCents,
   currentTopCents,
   claimFirstPriceCents,
 }: {
   slug: string;
+  categoryName: string;
   minBidCents: number;
   currentTopCents: number | null;
   claimFirstPriceCents: number;
@@ -60,7 +62,8 @@ export function ClaimPanel({
 
   return (
     <div className="text-center">
-      <div className="flex flex-wrap items-center justify-center gap-3">
+      <p className="text-sm font-medium uppercase tracking-wide text-slate">in {categoryName}</p>
+      <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
         <span className="font-display text-3xl font-bold text-ink sm:text-4xl">Claim #{previewRank} for</span>
         <div className="flex items-center gap-2">
           <button
