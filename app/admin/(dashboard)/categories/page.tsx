@@ -27,7 +27,7 @@ export default async function AdminCategoriesPage() {
               <tr key={category.id} className={`border-b border-border last:border-0 ${category.is_active ? "" : "opacity-50"}`}>
                 <td colSpan={6} className="p-0">
                   {/* One form per row. The Save button submits no `isActive`
-                      field at all, so it never touches visibility — only the
+                      field at all, so it never touches visibility - only the
                       dedicated toggle button (which submits its own name/value
                       pair) does. */}
                   <form action={updateCategoryAction} className="flex flex-wrap items-center gap-2 px-3 py-2">

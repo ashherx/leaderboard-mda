@@ -1,6 +1,6 @@
 // Hand-written types mirroring supabase/migrations/0001_init.sql.
 // If you later run `supabase gen types typescript`, that generated file can
-// replace this one — keep the shapes in sync until then.
+// replace this one - keep the shapes in sync until then.
 
 export type ListingStatus = "pending_payment" | "published" | "unpublished";
 export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
@@ -10,7 +10,7 @@ export type ReportStatus = "open" | "reviewed" | "dismissed";
 // These are `type`, not `interface`, on purpose: the Database.Tables/Views
 // entries below need to structurally satisfy supabase-js's
 // Record<string, unknown> constraints, and plain interfaces (unlike type
-// aliases) don't pick up an implicit index signature for that check — an
+// aliases) don't pick up an implicit index signature for that check - an
 // interface here would silently collapse every query's row type to `never`.
 export type Category = {
   id: string;

@@ -5,7 +5,7 @@ import { listActiveCategories } from "@/lib/db/categories";
  * Every category is its own separate ranking (mixing bids across categories
  * into one list would make "best in category" read as "biggest spender
  * overall," which undersells a category where $50 is genuinely competitive).
- * This is the sideways move between them — one click, no trip back through
+ * This is the sideways move between them - one click, no trip back through
  * the homepage.
  */
 export async function CategoryPillNav({ currentSlug }: { currentSlug: string }) {

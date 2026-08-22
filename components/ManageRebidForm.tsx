@@ -17,7 +17,7 @@ export function ManageRebidForm({
   currentBidDollars: number;
 }) {
   // How much *more* $1 is needed to claim #1 right now, if it's more than
-  // the $1 floor — this is a top-up amount, added to what's already paid,
+  // the $1 floor - this is a top-up amount, added to what's already paid,
   // never a new total (that ambiguity is what caused a provider to type "13"
   // meaning "$13 more" and get charged for a $13 total instead).
   const suggestedTopUpDollars = Math.max(1, Math.ceil(claimFirstPriceCents / 100) - currentBidDollars);
@@ -41,19 +41,19 @@ export function ManageRebidForm({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(data.error ?? "Something went wrong — try again.");
+        setError(data.error ?? "Something went wrong - try again.");
         setSubmitting(false);
         return;
       }
 
       const paddle = await getPaddleInstance();
       if (!paddle) {
-        setError("Payments aren't configured yet — contact the site owner.");
+        setError("Payments aren't configured yet - contact the site owner.");
         setSubmitting(false);
         return;
       }
 
-      // The new rank only takes effect once Paddle confirms the payment —
+      // The new rank only takes effect once Paddle confirms the payment -
       // the success page polls for that and shows the result there.
       paddle.Checkout.open({
         transactionId: data.transactionId,
@@ -63,7 +63,7 @@ export function ManageRebidForm({
       });
       setSubmitting(false);
     } catch {
-      setError("Network error — try again.");
+      setError("Network error - try again.");
       setSubmitting(false);
     }
   }
@@ -73,7 +73,7 @@ export function ManageRebidForm({
       <div>
         <h2 className="font-display font-semibold text-ink">Re-bid to reclaim a rank</h2>
         <p className="mt-1 text-sm text-slate">
-          You've already paid {formatCentsAsDollars(currentBidDollars * 100)} for this listing — a re-bid only
+          You've already paid {formatCentsAsDollars(currentBidDollars * 100)} for this listing - a re-bid only
           charges a top-up on top of that.
         </p>
       </div>
@@ -87,7 +87,7 @@ export function ManageRebidForm({
             : "border-border bg-white text-ink hover:border-green"
         }`}
       >
-        <span className="font-display font-semibold">Claim #1</span> — add {formatCentsAsDollars(suggestedTopUpDollars * 100)}{" "}
+        <span className="font-display font-semibold">Claim #1</span> - add {formatCentsAsDollars(suggestedTopUpDollars * 100)}{" "}
         <span className="text-slate">(total {formatCentsAsDollars(claimFirstPriceCents)})</span>
       </button>
 
@@ -123,7 +123,7 @@ export function ManageRebidForm({
         disabled={submitting || additionalDollarsNumber <= 0}
         className="self-start rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green disabled:opacity-60"
       >
-        {submitting ? "Submitting…" : `Re-bid — pay ${formatCentsAsDollars(additionalDollarsNumber * 100)}`}
+        {submitting ? "Submitting…" : `Re-bid - pay ${formatCentsAsDollars(additionalDollarsNumber * 100)}`}
       </button>
     </form>
   );

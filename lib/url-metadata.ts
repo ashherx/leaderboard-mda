@@ -6,7 +6,7 @@ import { uploadFaviconBuffer } from "@/lib/storage";
  * Fetches a provider-supplied URL server-side to prefill the submission form
  * (title → name, meta description → pitch, favicon → logo). Any endpoint
  * that fetches an arbitrary user-supplied URL from the server is an SSRF
- * vector — a submitter could point it at an internal service, localhost, or
+ * vector - a submitter could point it at an internal service, localhost, or
  * (on most cloud hosts) the instance metadata endpoint. Everything below
  * exists to close that off: only http(s), only public IPs (checked at every
  * redirect hop, not just the first), bounded redirects, bounded response
@@ -42,7 +42,7 @@ function isPrivateOrReservedIp(ip: string): boolean {
     return false;
   }
 
-  return true; // couldn't parse as an IP — refuse rather than guess
+  return true; // couldn't parse as an IP - refuse rather than guess
 }
 
 async function assertPublicUrl(url: URL): Promise<void> {
@@ -55,7 +55,7 @@ async function assertPublicUrl(url: URL): Promise<void> {
   if (isPrivateOrReservedIp(address)) throw new Error("That host isn't reachable.");
 }
 
-/** Follows redirects manually so every hop gets the same public-IP check — `redirect: "follow"` would only validate the first URL. */
+/** Follows redirects manually so every hop gets the same public-IP check - `redirect: "follow"` would only validate the first URL. */
 async function safeFetch(startUrl: string): Promise<Response> {
   let current = new URL(startUrl);
 
@@ -153,7 +153,7 @@ async function downloadAndStoreFavicon(faviconUrl: string): Promise<string | nul
     const result = await uploadFaviconBuffer(buffer, contentType);
     return result.ok ? result.url : null;
   } catch {
-    return null; // favicon is a nice-to-have — never let it fail the whole prefill
+    return null; // favicon is a nice-to-have - never let it fail the whole prefill
   }
 }
 
@@ -183,7 +183,7 @@ export async function fetchUrlMetadata(rawUrl: string): Promise<UrlMetadata> {
     try {
       faviconUrl = await downloadAndStoreFavicon(new URL(faviconHref, finalUrl).toString());
     } catch {
-      /* malformed href — fall through to the /favicon.ico guess below */
+      /* malformed href - fall through to the /favicon.ico guess below */
     }
   }
   if (!faviconUrl) {

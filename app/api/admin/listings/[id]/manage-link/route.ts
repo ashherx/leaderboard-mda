@@ -8,7 +8,7 @@ function buildManageUrl(request: Request, rawToken: string): string {
   return `${protocol}://${host}/manage/${rawToken}`;
 }
 
-/** Decrypts the listing's current live manage-token, if a decryptable copy exists — no mutation, nothing invalidated. */
+/** Decrypts the listing's current live manage-token, if a decryptable copy exists - no mutation, nothing invalidated. */
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   if (!hasValidAdminSession()) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const rawToken = await getCurrentManageToken(params.id);
   if (!rawToken) {
     return NextResponse.json(
-      { error: "No decryptable link on file for this listing — it predates this feature. Generate a new one instead." },
+      { error: "No decryptable link on file for this listing - it predates this feature. Generate a new one instead." },
       { status: 404 }
     );
   }

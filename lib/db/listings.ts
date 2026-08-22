@@ -13,7 +13,7 @@ export interface PaginatedListings {
 
 /**
  * Published listings for a category, ranked by bid amount. Rank isn't stored
- * anywhere — it's read straight off the `listing_ranks` view, which computes
+ * anywhere - it's read straight off the `listing_ranks` view, which computes
  * it on the fly via ROW_NUMBER() (see migration 0001 for why).
  */
 export async function listPublishedListingsForCategory(
@@ -80,7 +80,7 @@ export async function getCategoryStats(categoryId: string): Promise<CategoryStat
 
 /**
  * Given a bid amount, preview the rank it would earn among a category's
- * *currently published* listings — used by the "try a lower bid" UI before
+ * *currently published* listings - used by the "try a lower bid" UI before
  * the provider commits to paying. This is a preview only: the real rank at
  * publish time is whatever the listing_ranks view says once the payment
  * completes, since other bids can land in the meantime.
@@ -115,8 +115,8 @@ export interface CreatePendingListingInput {
 
 /**
  * Creates a listing in `pending_payment` status plus its manage-token, ahead
- * of sending the provider to checkout. Returns the raw token — the only time
- * it will ever exist outside the provider's own hands — so the caller can
+ * of sending the provider to checkout. Returns the raw token - the only time
+ * it will ever exist outside the provider's own hands - so the caller can
  * hand it back after payment succeeds (see markListingPublished).
  */
 export async function createPendingListing(
@@ -178,7 +178,7 @@ export interface ListingContentUpdate {
   logoUrl?: string | null;
 }
 
-/** Edits content only — no payment involved, doesn't touch bid_amount_cents/status/rank. */
+/** Edits content only - no payment involved, doesn't touch bid_amount_cents/status/rank. */
 export async function updateListingContent(listingId: string, update: ListingContentUpdate): Promise<Listing> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
@@ -212,7 +212,7 @@ export async function getListingByManageToken(rawToken: string): Promise<Listing
   return data;
 }
 
-/** The listing's true rank right now — used on the success page, since the rank a provider expected when the form loaded can be stale by the time payment completes. */
+/** The listing's true rank right now - used on the success page, since the rank a provider expected when the form loaded can be stale by the time payment completes. */
 export async function getListingRank(listingId: string): Promise<number | null> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
@@ -238,7 +238,7 @@ export async function getPublishedListingById(listingId: string): Promise<Listin
   return data;
 }
 
-/** Unfiltered by status — used on the success page, right after a listing is created/published. */
+/** Unfiltered by status - used on the success page, right after a listing is created/published. */
 export async function getListingById(listingId: string): Promise<Listing | null> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.from("listings").select("*").eq("id", listingId).maybeSingle();

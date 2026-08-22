@@ -3,7 +3,7 @@ import type { Database } from "@/lib/db/types";
 
 /**
  * Browser-safe Supabase client, using the public anon key.
- * Reads only (categories, published listings) — writes to listings/payments
+ * Reads only (categories, published listings) - writes to listings/payments
  * always go through server routes, never straight from the client.
  */
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

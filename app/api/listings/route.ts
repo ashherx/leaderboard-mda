@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
     logoUrl = uploadResult.url;
   } else if (typeof prefilledLogoUrl === "string" && isOwnStorageUrl(prefilledLogoUrl)) {
-    // Already uploaded during the URL-metadata prefill — nothing left to do
+    // Already uploaded during the URL-metadata prefill - nothing left to do
     // but trust it, and only because it's verified to be our own bucket.
     logoUrl = prefilledLogoUrl;
   }

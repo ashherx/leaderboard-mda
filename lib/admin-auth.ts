@@ -6,7 +6,7 @@ const SESSION_TTL_SECONDS = 60 * 60 * 8; // 8 hours
 
 function getSigningSecret(): string {
   // A dedicated secret is preferred, but fall back to deriving one from the
-  // admin password so a single env var is enough to get started — either
+  // admin password so a single env var is enough to get started - either
   // way this never becomes part of the cookie itself, only its signature.
   const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD;
   if (!secret) {
@@ -49,7 +49,7 @@ export function checkAdminPassword(candidate: string): boolean {
 
 export const ADMIN_SESSION_MAX_AGE_SECONDS = SESSION_TTL_SECONDS;
 
-/** Server-only check for use in Server Components/Actions — does not redirect, just reports true/false. */
+/** Server-only check for use in Server Components/Actions - does not redirect, just reports true/false. */
 export function hasValidAdminSession(): boolean {
   return isValidAdminSessionCookieValue(cookies().get(ADMIN_SESSION_COOKIE)?.value);
 }

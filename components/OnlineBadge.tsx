@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const POLL_INTERVAL_MS = 5000;
 
-/** Live "N online" indicator — starts from the server-rendered count, then polls every 5s. */
+/** Live "N online" indicator - starts from the server-rendered count, then polls every 5s. */
 export function OnlineBadge({ initialOnline }: { initialOnline: number }) {
   const [online, setOnline] = useState(initialOnline);
 
@@ -18,7 +18,7 @@ export function OnlineBadge({ initialOnline }: { initialOnline: number }) {
         const { online } = (await response.json()) as { online: number };
         if (!cancelled) setOnline(online);
       } catch {
-        // Transient network hiccup — keep showing the last known count.
+        // Transient network hiccup - keep showing the last known count.
       }
     }
 

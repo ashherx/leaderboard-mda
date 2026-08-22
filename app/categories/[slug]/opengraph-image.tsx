@@ -4,7 +4,7 @@ import { getCategoryPricing } from "@/lib/db/listings";
 
 // Not edge: this pulls in lib/db/listings.ts, which transitively imports
 // Node's `crypto` module (for manage-token hashing elsewhere in that file)
-// — not resolvable in the edge runtime.
+// - not resolvable in the edge runtime.
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -84,7 +84,7 @@ export default async function CategoryOgImage({
         >
           <span style={{ fontSize: 20, color: SLATE }}>Claim #1 for</span>
           <span style={{ fontSize: 40, fontWeight: 700, color: INK }}>
-            ${pricing ? pricing.claimFirstPriceCents / 100 : "—"}
+            ${pricing ? pricing.claimFirstPriceCents / 100 : "-"}
           </span>
         </div>
       </div>

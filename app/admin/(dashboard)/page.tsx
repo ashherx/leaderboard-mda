@@ -24,7 +24,7 @@ export default async function AdminOverviewPage() {
         <Stat label="Categories" value={String(categories.length)} />
       </div>
       <p className="mt-6 text-sm text-slate">
-        Revenue is summed from `payments` where status = completed — should match whatever your payment provider
+        Revenue is summed from `payments` where status = completed - should match whatever your payment provider
         reports once that's wired up.
       </p>
     </div>

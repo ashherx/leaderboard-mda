@@ -26,8 +26,8 @@ export function ClaimPanel({
   const [link, setLink] = useState("");
 
   // If this bid would take #1 outright, the rank is known without a round
-  // trip (nothing can currently outrank it). Only ambiguous bids — below
-  // the current #1 — need the preview API, and even then debounced.
+  // trip (nothing can currently outrank it). Only ambiguous bids - below
+  // the current #1 - need the preview API, and even then debounced.
   useEffect(() => {
     if (currentTopDollars === null || bidDollars > currentTopDollars) {
       setPreviewRank(1);
@@ -42,7 +42,7 @@ export function ClaimPanel({
           if (data.rank) setPreviewRank(data.rank);
         })
         .catch(() => {
-          /* aborted or transient — leave last known preview in place */
+          /* aborted or transient - leave last known preview in place */
         });
     }, 250);
 
@@ -99,7 +99,7 @@ export function ClaimPanel({
         {/* flex + items-center + leading-none, not text-align/line-height:
             Bricolage Grotesque's line box reserves more space below the
             glyphs than above, so centering via line-height alone left the
-            text sitting visibly high — flex-centering the tightened glyph
+            text sitting visibly high - flex-centering the tightened glyph
             box (leading-none removes the extra reserved leading) actually
             centers it. */}
         <a

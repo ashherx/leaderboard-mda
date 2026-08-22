@@ -13,7 +13,7 @@ export async function listActiveCategories(): Promise<Category[]> {
   return data;
 }
 
-/** Unfiltered by is_active — used for internal lookups (e.g. success page) where a since-hidden category should still resolve. */
+/** Unfiltered by is_active - used for internal lookups (e.g. success page) where a since-hidden category should still resolve. */
 export async function getCategoryById(id: string): Promise<Category | null> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.from("categories").select("*").eq("id", id).maybeSingle();

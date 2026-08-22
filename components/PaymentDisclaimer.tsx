@@ -2,7 +2,7 @@ import { SUPPORT_EMAIL } from "@/lib/site";
 
 /**
  * Paddle's own checkout overlay has no room for a seller's dispute/refund
- * notice, so this runs right above the button that opens it instead —
+ * notice, so this runs right above the button that opens it instead -
  * standard practice Paddle itself recommends, and the paper trail that backs
  * a chargeback dispute if one ever comes in.
  */

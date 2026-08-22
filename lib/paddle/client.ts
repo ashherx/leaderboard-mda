@@ -1,6 +1,6 @@
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 
-// Paddle.js should only ever be initialized once per page — cache the
+// Paddle.js should only ever be initialized once per page - cache the
 // promise so repeat calls (initial submit vs. a later re-bid) reuse it.
 let paddlePromise: Promise<Paddle | undefined> | null = null;
 

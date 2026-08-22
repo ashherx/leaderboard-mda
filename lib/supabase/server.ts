@@ -6,7 +6,7 @@ import type { Database } from "@/lib/db/types";
  *
  * This bypasses row-level security and must never be imported from a
  * client component or exposed to the browser. Use it from Server
- * Components, Server Actions, and Route Handlers only — anywhere that
+ * Components, Server Actions, and Route Handlers only - anywhere that
  * needs to write payments/listings or read data regardless of RLS
  * (e.g. resolving a manage-token, which isn't a Postgres-level identity).
  */
@@ -29,7 +29,7 @@ export function getSupabaseServerClient(): SupabaseClient<Database> {
     // Next.js patches global fetch to cache by default, even for
     // third-party libraries and even on routes marked force-dynamic. Every
     // query here is either bid-state (changes on every payment) or an
-    // auth-equivalent lookup (manage-token) — never safe to let Next's Data
+    // auth-equivalent lookup (manage-token) - never safe to let Next's Data
     // Cache serve a stale copy.
     global: {
       fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),

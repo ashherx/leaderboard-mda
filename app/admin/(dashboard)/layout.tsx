@@ -9,7 +9,7 @@ const NAV_LINKS = [
 ];
 
 // Internal ops tool, but styled on the same brand system as the public
-// app (see globals.css) rather than plain system-ui/gray-scale — same
+// app (see globals.css) rather than plain system-ui/gray-scale - same
 // fonts, colors, and card treatment, just a leaner layout.
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   if (!hasValidAdminSession()) redirect("/admin/login");

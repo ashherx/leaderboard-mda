@@ -1,4 +1,4 @@
--- DEMO DATA — for visually verifying ranking/pagination/display during
+-- DEMO DATA - for visually verifying ranking/pagination/display during
 -- Prompt 2 development only. Every row here is clearly fake ("(Demo)" in the
 -- name) and safe to delete once the admin panel (Prompt 5) exists, or via:
 --   delete from listings where provider_name like '%(Demo)%';

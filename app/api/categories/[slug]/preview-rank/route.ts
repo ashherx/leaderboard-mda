@@ -5,7 +5,7 @@ import { previewRankForBid } from "@/lib/db/listings";
 /**
  * Powers the "try a lower bid" input on a category page: given a dollar
  * amount, returns the rank it would earn among *currently published*
- * listings right now. Read-only, no payment involved — the real rank at
+ * listings right now. Read-only, no payment involved - the real rank at
  * publish time can differ if other bids land in between.
  */
 export async function GET(request: Request, { params }: { params: { slug: string } }) {

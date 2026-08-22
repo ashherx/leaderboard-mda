@@ -5,7 +5,7 @@ import { getPaymentByProviderPaymentId } from "@/lib/db/payments";
 /**
  * Polled by the success page (see PendingPaymentNotice) while it waits for
  * the Paddle webhook to land. `txn` (the Paddle transaction id from the
- * checkout that was just opened) is the authoritative signal when given —
+ * checkout that was just opened) is the authoritative signal when given -
  * on a re-bid the listing is already `published`, so that flag alone can't
  * tell "this specific payment confirmed" apart from "still showing the rank
  * from before this checkout." Without `txn` (older links, or genuinely no

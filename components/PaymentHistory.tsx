@@ -8,7 +8,7 @@ const STATUS_STYLES: Record<PaymentStatus, string> = {
   refunded: "bg-slate/15 text-slate",
 };
 
-/** Every payment attempt against this listing — initial claim plus every re-bid, successful or not. An audit trail, not just the current bid. */
+/** Every payment attempt against this listing - initial claim plus every re-bid, successful or not. An audit trail, not just the current bid. */
 export function PaymentHistory({ payments }: { payments: Payment[] }) {
   if (payments.length === 0) return null;
 

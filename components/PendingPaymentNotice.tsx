@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 
 /**
  * Shown on the success page when a listing's payment hasn't been confirmed
- * by the Paddle webhook yet — Paddle usually redirects the browser here
+ * by the Paddle webhook yet - Paddle usually redirects the browser here
  * within a second or two of the webhook firing, but there's no hard
- * guarantee of ordering. Polls until the (specific transaction, if given —
+ * guarantee of ordering. Polls until the (specific transaction, if given -
  * see `txn`) payment is confirmed, then re-renders the success page with the
  * real rank.
  */
@@ -27,7 +27,7 @@ export function PendingPaymentNotice({ token, txn }: { token: string; txn?: stri
           router.refresh();
         }
       } catch {
-        /* transient — the next tick will retry */
+        /* transient - the next tick will retry */
       }
     }, 1500);
 

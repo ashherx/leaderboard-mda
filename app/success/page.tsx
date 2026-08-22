@@ -39,7 +39,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
     txn ? getPaymentByProviderPaymentId(txn) : Promise.resolve(null),
   ]);
 
-  // On a re-bid the listing is already published — status alone can't tell
+  // On a re-bid the listing is already published - status alone can't tell
   // this specific checkout apart from the rank it had before it. Watching
   // the actual transaction id (when we have one) is what makes this
   // accurate instead of showing the pre-rebid rank as if it were final.
@@ -69,7 +69,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
       )}
 
       <div className="mt-6 rounded-xl border border-gold bg-gold/8 p-5">
-        <p className="font-display font-semibold text-ink">Save this link — it's the only way back in</p>
+        <p className="font-display font-semibold text-ink">Save this link - it's the only way back in</p>
         <p className="mt-1 text-sm text-slate">
           There are no accounts. This private link is the only way to edit your listing or re-bid to reclaim a
           better rank later. If you lose it, it can&apos;t be recovered.

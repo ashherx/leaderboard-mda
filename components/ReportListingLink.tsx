@@ -18,7 +18,7 @@ export function ReportListingLink({ listingId }: { listingId: string }) {
   const [done, setDone] = useState(false);
 
   if (done) {
-    return <span className="text-xs text-slate">Thanks — we&apos;ll take a look.</span>;
+    return <span className="text-xs text-slate">Thanks - we&apos;ll take a look.</span>;
   }
 
   if (!open) {

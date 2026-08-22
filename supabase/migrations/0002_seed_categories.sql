@@ -1,5 +1,5 @@
 -- Starting category list from the blueprint. Editable later via admin
--- (Prompt 5) — this seed just gets the fixed launch set into place.
+-- (Prompt 5) - this seed just gets the fixed launch set into place.
 insert into categories (name, slug, description, display_order) values
   ('Web & App Development',   'web-app-development',  'Sites, apps, and platforms built for clients.',        10),
   ('AI & Automation',         'ai-automation',         'AI integrations, agents, and workflow automation.',    20),

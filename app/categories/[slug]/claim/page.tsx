@@ -27,7 +27,7 @@ export default async function ClaimPage({
       ? requestedAmount
       : pricing.claimFirstPriceCents / 100;
 
-  // From the hero's quick-capture input, if the visitor filled it in there —
+  // From the hero's quick-capture input, if the visitor filled it in there -
   // just a convenience prefill, still fully editable on this form.
   const initialDestinationLink = searchParams.link ?? "";
 
@@ -42,7 +42,7 @@ export default async function ClaimPage({
         </Link>
         <h1 className="mt-2 font-display text-2xl font-bold text-ink">Claim your spot</h1>
         <p className="mt-1 text-slate">
-          Listing in <strong>{category.name}</strong>. Submitting opens a secure checkout — your listing goes live
+          Listing in <strong>{category.name}</strong>. Submitting opens a secure checkout - your listing goes live
           as soon as payment completes.
         </p>
 

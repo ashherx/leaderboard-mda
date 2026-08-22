@@ -15,7 +15,7 @@ import { LatestActivityPanel } from "@/components/LatestActivityPanel";
 
 const PAGE_SIZE = 25;
 
-// Rank order changes on every bid — never serve a build-time-frozen copy.
+// Rank order changes on every bid - never serve a build-time-frozen copy.
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -25,9 +25,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const title = `${category.name} Leaderboard`;
   const description = category.description ?? `See who's ranked #1 in ${category.name}, ranked purely by bid.`;
   // openGraph.title doesn't inherit the root layout's title template (that
-  // only applies to the <title> tag), so the "— The Podium" suffix is
+  // only applies to the <title> tag), so the "- The Podium" suffix is
   // spelled out here manually to keep share previews branded.
-  return { title, description, openGraph: { title: `${title} — The Podium`, description } };
+  return { title, description, openGraph: { title: `${title} - The Podium`, description } };
 }
 
 export default async function CategoryPage({
@@ -85,7 +85,7 @@ export default async function CategoryPage({
           <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-10 text-center">
             <p className="font-display text-lg font-semibold text-ink">No one's claimed this category yet</p>
             <p className="mt-1 text-sm text-slate">
-              Be the first — claim #1 for just ${pricing.claimFirstPriceCents / 100}.
+              Be the first - claim #1 for just ${pricing.claimFirstPriceCents / 100}.
             </p>
           </div>
         ) : (

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 export function VisitTracker() {
   useEffect(() => {
     fetch("/api/visit", { method: "POST" }).catch(() => {
-      /* best-effort — a missed ping just means one visitor undercounted briefly */
+      /* best-effort - a missed ping just means one visitor undercounted briefly */
     });
   }, []);
 

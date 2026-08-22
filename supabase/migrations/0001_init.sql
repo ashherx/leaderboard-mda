@@ -1,4 +1,4 @@
--- Agency Bid Leaderboard — initial schema
+-- Agency Bid Leaderboard - initial schema
 -- Money is stored as integer cents throughout (bids are whole-dollar, so always
 -- a multiple of 100) to avoid floating point drift; display layer converts to $.
 
@@ -103,7 +103,7 @@ create trigger listings_set_updated_at
 -- ---------------------------------------------------------------------------
 -- Rank is NEVER stored on the listing row. It's a position within a category's
 -- *published* listings, purely a function of bid_amount_cents, so storing it
--- would mean rewriting every lower-ranked row on each new bid — a write
+-- would mean rewriting every lower-ranked row on each new bid - a write
 -- amplification bug waiting to happen, and a value that can silently go stale.
 -- Instead it's computed on read via ROW_NUMBER() here. Ties (equal bids) are
 -- broken by claimed_at (first to claim that amount holds the higher rank),

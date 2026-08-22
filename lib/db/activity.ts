@@ -17,7 +17,7 @@ export interface TrendingListing {
   clicksInWindow: number;
 }
 
-/** Real clicks-per-hour, from the click_events log — not a relabeled lifetime total. */
+/** Real clicks-per-hour, from the click_events log - not a relabeled lifetime total. */
 export async function getTrendingListings(categoryId: string): Promise<TrendingListing[]> {
   const supabase = getSupabaseServerClient();
   const since = new Date(Date.now() - TRENDING_WINDOW_MINUTES * 60 * 1000).toISOString();
@@ -70,7 +70,7 @@ export interface ActivityItem {
 }
 
 /**
- * Real recent claims/re-bids in this category, from completed payments —
+ * Real recent claims/re-bids in this category, from completed payments -
  * not a fabricated feed. Shows each listing's *current* rank (not its rank
  * at the moment of that payment), since rank is a live property and
  * re-deriving historical rank would need a much heavier query for a vanity

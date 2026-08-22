@@ -1,4 +1,4 @@
--- Lightweight report queue — no moderation UI yet (per the blueprint's Phase
+-- Lightweight report queue - no moderation UI yet (per the blueprint's Phase
 -- 2 scope), just a place reports land so they can be reviewed via the
 -- Supabase dashboard or a future admin screen.
 create type report_status as enum ('open', 'reviewed', 'dismissed');

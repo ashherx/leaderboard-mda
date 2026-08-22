@@ -5,13 +5,13 @@ export function SiteHeader() {
     <header className="border-b border-border">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-end gap-2">
-          {/* next/image blocks local SVGs by default (XSS safeguard) — a
+          {/* next/image blocks local SVGs by default (XSS safeguard) - a
               plain <img> is simpler here anyway, since there's no raster
               resizing to gain from the optimizer for a vector file. The
               source file itself has built-in padding around the artwork
               (common for icon exports), so the visible graphic sits above
               the image's true bottom edge no matter how the flex box is
-              aligned — scaling up and clipping crops that padding away. */}
+              aligned - scaling up and clipping crops that padding away. */}
           <span className="relative h-7 w-7 shrink-0 overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

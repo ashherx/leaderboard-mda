@@ -6,7 +6,7 @@ import type { Listing } from "@/lib/db/types";
 
 export const dynamic = "force-dynamic";
 
-// Fixed column widths (via <colgroup>) keep every row the same shape —
+// Fixed column widths (via <colgroup>) keep every row the same shape -
 // otherwise a `<select>`'s width tracks its own option text, so "Category"
 // (and everything after it) drifts row to row. table-fixed + explicit
 // widths make the grid rigid instead; the outer wrapper still scrolls
@@ -82,7 +82,7 @@ export default async function AdminListingsPage({
           <tbody>
             {listings.map((listing) => {
               // Provider name + category are two separate cells for layout
-              // purposes, but still one save action — each control points
+              // purposes, but still one save action - each control points
               // at this row's form by id (the `form` attribute) instead of
               // being nested inside it, so the columns can line up cleanly.
               const formId = `listing-${listing.id}`;
@@ -121,7 +121,7 @@ export default async function AdminListingsPage({
                   <td className="px-3 py-2">
                     <StatusBadge status={listing.status} />
                   </td>
-                  <td className="px-3 py-2 text-slate">{listing.latestPaymentStatus ?? "—"}</td>
+                  <td className="px-3 py-2 text-slate">{listing.latestPaymentStatus ?? "-"}</td>
                   <td className="px-3 py-2">
                     <form action={setVerifiedAction}>
                       <input type="hidden" name="id" value={listing.id} />

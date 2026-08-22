@@ -28,7 +28,7 @@ export default function RulesPage() {
             <h2 className="font-display text-lg font-semibold text-ink">How ranking works</h2>
             <p className="mt-2 text-slate">
               Every category is its own leaderboard. Whoever has paid the most is #1. Pay less than #1 and you still
-              get a spot — whatever rank your amount can currently buy among that category's listings. There's no
+              get a spot - whatever rank your amount can currently buy among that category's listings. There's no
               review, no vote, no algorithm deciding who ranks where. Just dollars.
             </p>
             <p className="mt-2 text-slate">
@@ -41,7 +41,7 @@ export default function RulesPage() {
             <h2 className="font-display text-lg font-semibold text-ink">A completed payment claims the rank</h2>
             <p className="mt-2 text-slate">
               Your listing goes live the moment payment completes, at whatever rank your amount earns at that
-              exact moment — not necessarily the rank you saw when you opened the form, since someone else may have
+              exact moment - not necessarily the rank you saw when you opened the form, since someone else may have
               bid in the meantime. No payment, no listing.
             </p>
           </section>
@@ -49,8 +49,8 @@ export default function RulesPage() {
           <section>
             <h2 className="font-display text-lg font-semibold text-ink">What can be listed</h2>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-slate">
-              <li>Real service providers only — agencies, freelancers, consultants. No SaaS products, no novelty accounts.</li>
-              <li>Your destination link goes to your site, portfolio, or booking page — not a chat or invite link.</li>
+              <li>Real service providers only - agencies, freelancers, consultants. No SaaS products, no novelty accounts.</li>
+              <li>Your destination link goes to your site, portfolio, or booking page - not a chat or invite link.</li>
               <li>No illegal services. No adult services.</li>
             </ul>
             <p className="mt-2 text-slate">
@@ -63,7 +63,7 @@ export default function RulesPage() {
             <h2 className="font-display text-lg font-semibold text-ink">No accounts</h2>
             <p className="mt-2 text-slate">
               There's no login. Payment issues a private manage link that lets you edit your listing or re-bid
-              later — that link is the only way back in, and it can&apos;t be recovered if you lose it. Save it
+              later - that link is the only way back in, and it can&apos;t be recovered if you lose it. Save it
               somewhere.
             </p>
           </section>

@@ -45,10 +45,10 @@ export default async function ManageListingPage({ params }: { params: { token: s
   ]);
 
   // listing.claimed_at only ever records the *first* time this listing went
-  // live — it deliberately never moves on a re-bid (it's also the rank
+  // live - it deliberately never moves on a re-bid (it's also the rank
   // tie-break: whoever's held a given bid amount longest wins ties). The
   // "Claimed" field here is about the current standing, though, so it reads
-  // off the most recent completed payment instead — payments is already
+  // off the most recent completed payment instead - payments is already
   // newest-first.
   const lastClaimedAt = payments.find((payment) => payment.status === "completed")?.completed_at ?? listing.claimed_at;
 
@@ -63,7 +63,7 @@ export default async function ManageListingPage({ params }: { params: { token: s
       <dl className="mt-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-white p-5 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-slate">Category</dt>
-          <dd className="font-medium text-ink">{category?.name ?? "—"}</dd>
+          <dd className="font-medium text-ink">{category?.name ?? "-"}</dd>
         </div>
         <div>
           <dt className="text-slate">Current rank</dt>

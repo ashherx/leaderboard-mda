@@ -11,7 +11,7 @@ import {
   updateListingDetails,
 } from "@/lib/db/admin";
 
-/** Every action re-checks the session itself — defense in depth beyond the layout's redirect, since Server Actions can be invoked directly. */
+/** Every action re-checks the session itself - defense in depth beyond the layout's redirect, since Server Actions can be invoked directly. */
 function requireAdmin() {
   if (!hasValidAdminSession()) redirect("/admin/login");
 }
@@ -63,7 +63,7 @@ export async function updateCategoryAction(formData: FormData) {
     name: name || undefined,
     minBidCents: Number.isFinite(minBidDollars) && minBidDollars > 0 ? Math.round(minBidDollars) * 100 : undefined,
     displayOrder: Number.isFinite(displayOrder) ? displayOrder : undefined,
-    // Only the toggle button includes this field (see categories/page.tsx) —
+    // Only the toggle button includes this field (see categories/page.tsx) -
     // the plain "Save" button doesn't, so saving details never silently
     // flips a category's visibility.
     isActive: formData.has("isActive") ? formData.get("isActive") === "true" : undefined,

@@ -19,7 +19,7 @@ export async function POST(request: Request, { params }: { params: { token: stri
     }
     logoUrl = uploadResult.url;
   } else {
-    // No new file chosen — keep the existing logo rather than clearing it.
+    // No new file chosen - keep the existing logo rather than clearing it.
     const existing = await getListingByManageToken(params.token);
     logoUrl = existing?.logo_url ?? undefined;
   }

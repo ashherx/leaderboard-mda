@@ -4,7 +4,7 @@
  * MDA brand system (matches milliondollar.agency's global.css).
  * Custom theme colors support Tailwind's opacity modifiers natively
  * (e.g. bg-gold/12, bg-green/8), so the "dim" variants mentioned in the
- * blueprint are just those utilities at the specified opacity — no
+ * blueprint are just those utilities at the specified opacity - no
  * separate tokens needed.
  */
 @theme {

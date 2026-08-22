@@ -1,6 +1,6 @@
 /**
  * Rejects destination links that are direct chat/invite links rather than a
- * genuine portfolio/website/booking page — the same rule outbid.lol used to
+ * genuine portfolio/website/booking page - the same rule outbid.lol used to
  * keep listings from becoming a spam funnel. Calendly, X/Twitter profiles,
  * and ordinary websites are all fine; a Discord invite or WhatsApp
  * click-to-chat link is not.
@@ -34,7 +34,7 @@ export function validateDestinationLink(rawUrl: string): { ok: true; url: string
   if (isBlocked) {
     return {
       ok: false,
-      error: "Direct chat/invite links aren't allowed — link to your site, portfolio, or booking page instead.",
+      error: "Direct chat/invite links aren't allowed - link to your site, portfolio, or booking page instead.",
     };
   }
 

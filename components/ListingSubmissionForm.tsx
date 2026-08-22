@@ -58,7 +58,7 @@ export function ListingSubmissionForm({
         if (!pitchTouched.current && data.description) setPitch(data.description.slice(0, PITCH_MAX_LENGTH));
         if (data.faviconUrl) setFaviconUrl(data.faviconUrl);
       } catch {
-        /* best-effort prefill — a failed fetch just means the form stays blank */
+        /* best-effort prefill - a failed fetch just means the form stays blank */
       } finally {
         setFetchingMetadata(false);
       }
@@ -78,7 +78,7 @@ export function ListingSubmissionForm({
     const formData = new FormData(e.currentTarget);
     formData.set("categorySlug", categorySlug);
     // Only carry the auto-fetched favicon through if the visitor hasn't
-    // chosen their own file — the file input (if filled) wins server-side
+    // chosen their own file - the file input (if filled) wins server-side
     // regardless, but no need to send both.
     const manualFile = formData.get("logo");
     if (faviconUrl && !(manualFile instanceof File && manualFile.size > 0)) {
@@ -90,20 +90,20 @@ export function ListingSubmissionForm({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(data.error ?? "Something went wrong — try again.");
+        setError(data.error ?? "Something went wrong - try again.");
         setSubmitting(false);
         return;
       }
 
       const paddle = await getPaddleInstance();
       if (!paddle) {
-        setError("Payments aren't configured yet — contact the site owner.");
+        setError("Payments aren't configured yet - contact the site owner.");
         setSubmitting(false);
         return;
       }
 
       // Paddle redirects the browser to the success page itself once the
-      // checkout completes — the listing goes live from the webhook that
+      // checkout completes - the listing goes live from the webhook that
       // fires around the same time (see PendingPaymentNotice).
       paddle.Checkout.open({
         transactionId: data.transactionId,
@@ -113,7 +113,7 @@ export function ListingSubmissionForm({
       });
       setSubmitting(false);
     } catch {
-      setError("Network error — try again.");
+      setError("Network error - try again.");
       setSubmitting(false);
     }
   }
@@ -135,7 +135,7 @@ export function ListingSubmissionForm({
           className="mt-1 w-full rounded-md border border-border px-3 py-2 text-ink outline-none focus:border-green"
         />
         <p className="mt-1 text-xs text-slate">
-          Your site, portfolio, or booking page — no chat/invite links.
+          Your site, portfolio, or booking page - no chat/invite links.
           {fetchingMetadata && " Fetching info from this link…"}
         </p>
       </div>
@@ -184,7 +184,7 @@ export function ListingSubmissionForm({
 
       <div>
         <label htmlFor="logo" className="block text-sm font-medium text-ink">
-          Logo <span className="text-slate">(optional — pulled automatically from your link above if we can find one)</span>
+          Logo <span className="text-slate">(optional - pulled automatically from your link above if we can find one)</span>
         </label>
         <div className="mt-1 flex items-center gap-3">
           {manualPreviewUrl || faviconUrl ? (
@@ -196,7 +196,7 @@ export function ListingSubmissionForm({
             />
           ) : (
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-dashed border-border text-xs text-slate">
-              —
+              -
             </span>
           )}
           <input

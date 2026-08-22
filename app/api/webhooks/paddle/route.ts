@@ -4,7 +4,7 @@ import { getPaddleClient } from "@/lib/paddle/server";
 import { completePaddlePayment } from "@/lib/checkout";
 
 /**
- * Paddle calls this once a checkout transaction is fully paid — it's the
+ * Paddle calls this once a checkout transaction is fully paid - it's the
  * only place a real (non-stub) payment actually publishes a listing (see
  * completePaddlePayment in lib/checkout.ts). Configure this URL as a
  * notification destination in the Paddle dashboard (sandbox for now):
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   }
 
   const signature = request.headers.get("paddle-signature") ?? "";
-  // Signature verification needs the exact raw bytes Paddle signed — must
+  // Signature verification needs the exact raw bytes Paddle signed - must
   // read as text, never request.json(), or the HMAC won't match.
   const rawBody = await request.text();
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   if (event?.eventType === EventName.TransactionCompleted) {
     // The amount actually charged (event.data.details.totals.total) is only
-    // the re-bid top-up, not the listing's final bid — the real target came
+    // the re-bid top-up, not the listing's final bid - the real target came
     // along for the ride in custom_data when the transaction was created
     // (see createBidTransaction).
     const targetBidAmountCents = Number(event.data.customData?.targetBidAmountCents);
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     }
   }
 
-  // Paddle retries on non-2xx — always 200 once verified, even for event
+  // Paddle retries on non-2xx - always 200 once verified, even for event
   // types we don't act on, so it doesn't keep retrying those forever.
   return NextResponse.json({ ok: true });
 }

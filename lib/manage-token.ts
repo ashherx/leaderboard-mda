@@ -6,12 +6,12 @@ import { randomBytes, createHash, createCipheriv, createDecipheriv, timingSafeEq
  * token, hand the raw value to the provider exactly once (in the URL /
  * email), and store only its SHA-256 hash (`listings.manage_token_hash`).
  * Looking a token up means hashing the incoming value and matching the hash
- * — the raw token is never persisted anywhere in recoverable form... except
+ * - the raw token is never persisted anywhere in recoverable form... except
  * for one deliberate, explicitly-chosen exception: an admin "copy the
  * current live link" support feature also stores a *reversibly encrypted*
  * copy (`listings.manage_token_encrypted`, see encryptManageToken below). A
- * database leak alone still isn't enough to recover it — MANAGE_TOKEN_ENCRYPTION_KEY
- * lives in an env var, not the database — but this is a strictly weaker
+ * database leak alone still isn't enough to recover it - MANAGE_TOKEN_ENCRYPTION_KEY
+ * lives in an env var, not the database - but this is a strictly weaker
  * guarantee than the hash, which can never be reversed by anyone under any
  * circumstances. Both are stored on every new/regenerated token.
  */
@@ -49,7 +49,7 @@ function getEncryptionKey(): Buffer {
   return key;
 }
 
-/** Reversible, unlike hashManageToken — see the file-level comment for why this exists and its tradeoff. Packs iv + authTag + ciphertext into one base64url string. */
+/** Reversible, unlike hashManageToken - see the file-level comment for why this exists and its tradeoff. Packs iv + authTag + ciphertext into one base64url string. */
 export function encryptManageToken(rawToken: string): string {
   const iv = randomBytes(IV_BYTES);
   const cipher = createCipheriv(ENCRYPTION_ALGORITHM, getEncryptionKey(), iv);

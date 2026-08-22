@@ -1,10 +1,10 @@
 import { formatCentsAsDollars, formatTimeSince } from "@/lib/format";
 import type { ListingWithRank } from "@/lib/db/types";
-// "Report this listing" is turned off for now — see the commented-out usage below.
+// "Report this listing" is turned off for now - see the commented-out usage below.
 // import { ReportListingLink } from "@/components/ReportListingLink";
 
 // Opacity steps down by rank, but stays high enough (80/60%) that white text
-// keeps working — a lighter tint (like the old /15-/30 range) would leave
+// keeps working - a lighter tint (like the old /15-/30 range) would leave
 // white unreadable against a near-canvas background.
 const RANK_BADGE_STYLES: Record<number, string> = {
   1: "bg-gold text-white",
@@ -24,7 +24,7 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
   return (
     <li className="relative overflow-hidden px-4 py-4 transition-colors hover:bg-canvas">
       {isTopThree && (
-        // Right triangle overlaying the card's actual top-left corner — flush
+        // Right triangle overlaying the card's actual top-left corner - flush
         // against the edges (no inset), right angle at 0,0, hypotenuse
         // running to the bottom-right. Absolutely positioned, out of flow,
         // so it doesn't compete with the row's own padding.
@@ -82,7 +82,7 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
         </span>
       </a>
 
-      {/* "Report this listing" is turned off for now — component/API/table
+      {/* "Report this listing" is turned off for now - component/API/table
           are all still intact, just not rendered. Re-add the div below to
           bring it back:
       <div className={`mt-2 ${isTopThree ? "ml-14" : "ml-18"}`}>

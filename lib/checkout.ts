@@ -17,7 +17,7 @@ export interface ListingContentInput {
   logoUrl?: string | null;
 }
 
-/** Shared by both initial submission and manage-page edits — same rules either way. */
+/** Shared by both initial submission and manage-page edits - same rules either way. */
 function validateListingContent(
   input: ListingContentInput
 ): { ok: true; providerName: string; pitch: string; destinationLink: string } | { ok: false; error: string } {
@@ -40,14 +40,14 @@ function validateListingContent(
 /**
  * Opens a Paddle checkout for a listing: a `pending` payment audit row plus a
  * matching Paddle transaction, linked via provider_payment_id. The listing
- * itself doesn't go live yet — that happens in completePaddlePayment, called
+ * itself doesn't go live yet - that happens in completePaddlePayment, called
  * from the Paddle webhook (app/api/webhooks/paddle/route.ts) once the
  * transaction actually completes. Returns the transaction id for the client
  * to open Paddle Checkout against.
  *
  * chargeAmountCents and targetBidAmountCents differ for a re-bid: Paddle only
  * charges the top-up difference, but the listing's bid should end up at the
- * full new amount — see rebidListingViaToken.
+ * full new amount - see rebidListingViaToken.
  */
 async function startPaddleCheckout(
   listingId: string,
@@ -69,10 +69,10 @@ async function startPaddleCheckout(
   return transactionId;
 }
 
-/** Called by the Paddle webhook once a transaction completes — the only place a real (non-stub) payment actually publishes a listing. */
+/** Called by the Paddle webhook once a transaction completes - the only place a real (non-stub) payment actually publishes a listing. */
 export async function completePaddlePayment(transactionId: string, targetBidAmountCents: number): Promise<void> {
   const payment = await markPaymentCompleted(transactionId, "paddle");
-  if (!payment) return; // Unknown transaction id, or already processed — ignore.
+  if (!payment) return; // Unknown transaction id, or already processed - ignore.
   await publishListing(payment.listing_id, targetBidAmountCents);
 }
 
@@ -114,7 +114,7 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
     listing.id,
     bidAmountCents,
     bidAmountCents,
-    `${category.name} listing — ${content.providerName}`,
+    `${category.name} listing - ${content.providerName}`,
     `New listing bid: ${content.providerName} in ${category.name}`
   );
 
@@ -125,7 +125,7 @@ export type ManageActionResult =
   | { ok: true; rank: number | null }
   | { ok: false; error: string };
 
-/** Edits a listing's content via its manage-token. No payment involved — bid/rank/status are untouched. */
+/** Edits a listing's content via its manage-token. No payment involved - bid/rank/status are untouched. */
 export async function editListingViaToken(
   rawToken: string,
   input: ListingContentInput
@@ -152,7 +152,7 @@ export type RebidResult = { ok: true; transactionId: string } | { ok: false; err
 /**
  * Re-bid via the manage-token: opens a Paddle checkout for a new payment
  * against the *existing* listing (never a duplicate). `additionalBidDollars`
- * is a top-up amount, not a new total — the provider has already paid
+ * is a top-up amount, not a new total - the provider has already paid
  * listing.bid_amount_cents for it, so that's exactly what Paddle charges and
  * exactly what the listing's bid goes up by. The listing's
  * bid_amount_cents/rank only change once the webhook confirms payment; the
@@ -178,7 +178,7 @@ export async function rebidListingViaToken(rawToken: string, additionalBidDollar
     listing.id,
     chargeAmountCents,
     bidAmountCents,
-    `${category.name} re-bid top-up — ${listing.provider_name}`,
+    `${category.name} re-bid top-up - ${listing.provider_name}`,
     `Re-bid top-up: ${listing.provider_name} in ${category.name}, +$${additionalBidDollars} (from $${listing.bid_amount_cents / 100} to $${bidAmountCents / 100})`
   );
 

@@ -35,7 +35,7 @@ export function ManageEditForm({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(data.error ?? "Something went wrong — try again.");
+        setError(data.error ?? "Something went wrong - try again.");
         setSubmitting(false);
         return;
       }
@@ -44,7 +44,7 @@ export function ManageEditForm({
       setSubmitting(false);
       router.refresh();
     } catch {
-      setError("Network error — try again.");
+      setError("Network error - try again.");
       setSubmitting(false);
     }
   }

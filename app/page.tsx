@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { listActiveCategories } from "@/lib/db/categories";
 
-// No separate homepage grid — the category page (with the pill nav to
+// No separate homepage grid - the category page (with the pill nav to
 // switch between categories) is the canonical page type. "/" just picks a
 // default: the first category by display_order.
 export const dynamic = "force-dynamic";

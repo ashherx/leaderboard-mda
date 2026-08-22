@@ -60,7 +60,7 @@ export async function listAllListingsForAdmin(filters: AdminListingFilters = {})
     const embedded = (listing as unknown as { categories: { name: string; slug: string } | null }).categories;
     return {
       ...listing,
-      categoryName: embedded?.name ?? "—",
+      categoryName: embedded?.name ?? "-",
       categorySlug: embedded?.slug ?? "",
       rank: rankById.get(listing.id) ?? null,
       latestPaymentStatus: latestPaymentByListing.get(listing.id) ?? null,
@@ -83,7 +83,7 @@ export async function setListingVerified(listingId: string, verified: boolean): 
 /**
  * Decrypts a listing's current manage-token, if a decryptable copy exists.
  * Returns null for listings issued before manage_token_encrypted existed
- * and never since regenerated — there's nothing to decrypt for those; the
+ * and never since regenerated - there's nothing to decrypt for those; the
  * admin's only option there is regenerateManageToken below.
  */
 export async function getCurrentManageToken(listingId: string): Promise<string | null> {
@@ -100,7 +100,7 @@ export async function getCurrentManageToken(listingId: string): Promise<string |
 }
 
 /**
- * Mints a fresh manage-token for a listing and returns the raw value — for
+ * Mints a fresh manage-token for a listing and returns the raw value - for
  * when a provider asks support for their manage link and there's no
  * decryptable copy to fall back on (see getCurrentManageLink). This
  * necessarily invalidates whatever link the provider already had.
@@ -124,7 +124,7 @@ export interface ListingDetailsUpdate {
 }
 
 /**
- * Reassigning category_id is enough on its own — rank is derived purely
+ * Reassigning category_id is enough on its own - rank is derived purely
  * from bid_amount_cents within category_id (see the listing_ranks view), so
  * moving a listing to a new category just makes it compete in that
  * category's ranking on the next read. No separate re-rank step needed.
@@ -141,7 +141,7 @@ export async function updateListingDetails(listingId: string, update: ListingDet
   if (error) throw error;
 }
 
-/** All categories, including hidden ones — for the admin category manager. */
+/** All categories, including hidden ones - for the admin category manager. */
 export async function listAllCategoriesForAdmin(): Promise<Category[]> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.from("categories").select("*").order("display_order", { ascending: true });

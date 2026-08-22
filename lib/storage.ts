@@ -34,7 +34,7 @@ async function uploadToBucket(
     upsert: false,
   });
 
-  if (error) return { ok: false, error: "Upload failed — try again." };
+  if (error) return { ok: false, error: "Upload failed - try again." };
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   return { ok: true, url: data.publicUrl };
@@ -70,7 +70,7 @@ export async function uploadFaviconBuffer(buffer: Buffer, contentType: string): 
  * auto-fetch already uploaded it, so there's nothing left to upload) instead
  * of a file. Since that field arrives as ordinary client-controlled form
  * data, verify it actually points at our own bucket before trusting it as a
- * listing's logo — otherwise anyone could POST directly to the API with an
+ * listing's logo - otherwise anyone could POST directly to the API with an
  * arbitrary external image URL and skip every type/size check above.
  */
 export function isOwnStorageUrl(url: string): boolean {
