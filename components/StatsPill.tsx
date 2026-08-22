@@ -1,9 +1,8 @@
-import { countTotalVisitors } from "@/lib/db/site-visits";
-import { getOnlineVisitorCount } from "@/lib/online-visitors";
+import { countRecentVisitors, countTotalVisitors } from "@/lib/db/site-visits";
 import { OnlineBadge } from "@/components/OnlineBadge";
 
 export async function StatsPill() {
-  const [online, total] = await Promise.all([getOnlineVisitorCount(), countTotalVisitors()]);
+  const [online, total] = await Promise.all([countRecentVisitors(), countTotalVisitors()]);
 
   return (
     <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-border bg-white px-4 py-1.5 text-sm text-slate">
