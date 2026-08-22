@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
 export function Pagination({
   basePath,
@@ -19,8 +20,9 @@ export function Pagination({
   return (
     <nav className="mt-6 flex items-center justify-between text-sm">
       {page > 1 ? (
-        <Link href={hrefFor(page - 1)} className="font-medium text-ink hover:text-green">
-          ← Previous
+        <Link href={hrefFor(page - 1)} className="inline-flex items-center gap-1 font-medium text-ink hover:text-green">
+          <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
+          Previous
         </Link>
       ) : (
         <span />
@@ -29,8 +31,9 @@ export function Pagination({
         Page {page} of {totalPages}
       </span>
       {page < totalPages ? (
-        <Link href={hrefFor(page + 1)} className="font-medium text-ink hover:text-green">
-          Next →
+        <Link href={hrefFor(page + 1)} className="inline-flex items-center gap-1 font-medium text-ink hover:text-green">
+          Next
+          <ArrowRight weight="duotone" className="h-3.5 w-3.5" />
         </Link>
       ) : (
         <span />

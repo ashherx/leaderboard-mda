@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { headers } from "next/headers";
+import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { getListingByManageToken, getListingRank } from "@/lib/db/listings";
 import { getCategoryById } from "@/lib/db/categories";
 import { getPaymentByProviderPaymentId } from "@/lib/db/payments";
@@ -21,8 +22,9 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
         <main className="mx-auto max-w-lg px-4 py-16 text-center">
           <p className="font-display text-xl font-semibold text-ink">Nothing to show here</p>
           <p className="mt-2 text-slate">This link is missing or invalid.</p>
-          <Link href="/" className="mt-6 inline-block text-sm text-green hover:underline">
-            ← Back to the leaderboard
+          <Link href="/" className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline">
+            <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
+            Back to the leaderboard
           </Link>
         </main>
         <Footer />
@@ -77,15 +79,17 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
         </div>
         <a
           href={manageUrl}
-          className="mt-3 inline-block rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-green"
+          className="mt-3 inline-flex items-center gap-1 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-green"
         >
-          Manage my listing →
+          Manage my listing
+          <ArrowRight weight="duotone" className="h-3.5 w-3.5" />
         </a>
       </div>
 
       {category && (
-        <Link href={`/categories/${category.slug}`} className="mt-6 inline-block text-sm text-green hover:underline">
-          ← View the {category.name} leaderboard
+        <Link href={`/categories/${category.slug}`} className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline">
+          <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
+          View the {category.name} leaderboard
         </Link>
       )}
     </main>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -15,8 +16,9 @@ export default function RulesPage() {
       <VisitTracker />
       <SiteHeader />
       <main className="mx-auto max-w-4xl px-4 py-12">
-        <Link href="/" className="text-sm text-slate hover:text-green">
-          ← Leaderboard
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-slate hover:text-green">
+          <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
+          Leaderboard
         </Link>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink">Rules</h1>
         <p className="mt-2 text-slate">Short version: highest payment wins. Here's the rest.</p>

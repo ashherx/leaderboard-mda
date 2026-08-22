@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { getCategoryBySlug } from "@/lib/db/categories";
 import { getCategoryPricing } from "@/lib/db/listings";
 import { ListingSubmissionForm } from "@/components/ListingSubmissionForm";
@@ -35,8 +36,9 @@ export default async function ClaimPage({
       <VisitTracker />
       <SiteHeader />
       <main className="mx-auto max-w-lg px-4 py-10">
-        <Link href={`/categories/${category.slug}`} className="text-sm text-slate hover:text-green">
-          ← Back to {category.name}
+        <Link href={`/categories/${category.slug}`} className="inline-flex items-center gap-1 text-sm text-slate hover:text-green">
+          <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
+          Back to {category.name}
         </Link>
         <h1 className="mt-2 font-display text-2xl font-bold text-ink">Claim your spot</h1>
         <p className="mt-1 text-slate">

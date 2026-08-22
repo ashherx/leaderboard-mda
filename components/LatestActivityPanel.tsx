@@ -1,3 +1,4 @@
+import { Broadcast } from "@phosphor-icons/react/dist/ssr";
 import { getLatestActivity } from "@/lib/db/activity";
 import { formatTimeSince } from "@/lib/format";
 
@@ -6,8 +7,9 @@ export async function LatestActivityPanel({ categoryId }: { categoryId: string }
 
   return (
     <div className="rounded-xl border border-border bg-white p-3">
-      <p className="font-display text-xs font-semibold text-ink">
-        <span className="text-green">●</span> Latest activity
+      <p className="flex items-center gap-1 font-display text-xs font-semibold text-ink">
+        <Broadcast weight="duotone" className="h-4 w-4 text-green" />
+        Latest activity
       </p>
       {activity.length === 0 ? (
         <p className="mt-2 text-xs text-slate">No claims yet in this category.</p>

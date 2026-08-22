@@ -1,3 +1,4 @@
+import { Fire } from "@phosphor-icons/react/dist/ssr";
 import { getTrendingListings } from "@/lib/db/activity";
 
 export async function TrendingPanel({ categoryId }: { categoryId: string }) {
@@ -5,7 +6,10 @@ export async function TrendingPanel({ categoryId }: { categoryId: string }) {
 
   return (
     <div className="rounded-xl border border-border bg-white p-3">
-      <p className="font-display text-xs font-semibold text-ink">🔥 Trending right now</p>
+      <p className="flex items-center gap-1 font-display text-xs font-semibold text-ink">
+        <Fire weight="duotone" className="h-4 w-4 text-gold" />
+        Trending right now
+      </p>
       {trending.length === 0 ? (
         <p className="mt-2 text-xs text-slate">No clicks in the last hour yet.</p>
       ) : (
