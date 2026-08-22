@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Minus, Plus } from "@phosphor-icons/react";
+import { ArrowDownIcon, ArrowUpIcon } from "@phosphor-icons/react";
 import { formatCentsAsDollars } from "@/lib/format";
 
 const STEP_DOLLARS = 1;
@@ -69,7 +69,7 @@ export function ClaimPanel({
             aria-label="Decrease bid"
             className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/12 text-ink transition-colors hover:bg-gold/20"
           >
-            <Minus weight="duotone" className="h-4 w-4" />
+            <ArrowDownIcon weight="duotone" className="h-4 w-4" />
           </button>
           <span className="font-mono text-3xl font-bold text-gold sm:text-4xl">{formatCentsAsDollars(bidDollars * 100)}</span>
           <button
@@ -78,7 +78,7 @@ export function ClaimPanel({
             aria-label="Increase bid"
             className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/12 text-ink transition-colors hover:bg-gold/20"
           >
-            <Plus weight="duotone" className="h-4 w-4" />
+            <ArrowUpIcon weight="duotone" className="h-4 w-4" />
           </button>
         </div>
       </div>
