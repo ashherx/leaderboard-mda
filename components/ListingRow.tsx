@@ -1,5 +1,7 @@
 import { formatCentsAsDollars, formatTimeSince } from "@/lib/format";
 import type { ListingWithRank } from "@/lib/db/types";
+import { ListingInfoPill } from "@/components/ListingInfoPill";
+import { ListingOutboundLink } from "@/components/ListingOutboundLink";
 // "Report this listing" is turned off for now - see the commented-out usage below.
 // import { ReportListingLink } from "@/components/ReportListingLink";
 
@@ -16,6 +18,12 @@ const PRICE_TEXT_STYLES: Record<number, string> = {
   1: "text-gold",
   2: "text-gold/80",
   3: "text-gold/60",
+};
+
+const AVAILABILITY_LABELS: Record<string, string> = {
+  standard_hours: "Standard hours",
+  same_day: "Same-day",
+  "24_7": "24/7 emergency",
 };
 
 export function ListingRow({ listing }: { listing: ListingWithRank }) {
@@ -36,9 +44,13 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
         </span>
       )}
 
-      <a href={`/r/${listing.id}`} className={`flex items-start gap-4 ${isTopThree ? "pl-14" : ""}`}>
+      <ListingOutboundLink
+        listingId={listing.id}
+        destinationLink={listing.destination_link}
+        className={`flex items-start gap-4 ${isTopThree ? "pl-14" : ""}`}
+      >
         {!isTopThree && (
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-canvas font-mono text-base font-bold text-slate">
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-canvas font-mono text-base font-bold text-slate">
             #{listing.rank}
           </span>
         )}
@@ -51,27 +63,59 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
           <img
             src={listing.logo_url}
             alt=""
-            className="h-14 w-14 shrink-0 rounded-full bg-canvas object-contain p-2"
+            className="h-16 w-16 shrink-0 rounded-full border border-border bg-canvas object-contain p-2"
           />
         ) : (
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-canvas font-display text-lg text-slate">
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-border bg-canvas font-display text-xl text-slate">
             {listing.provider_name.charAt(0).toUpperCase()}
           </span>
         )}
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-2">
-            <span className="font-display text-base font-bold text-ink">{listing.provider_name}</span>
+            <span className="font-display text-base font-bold text-ink">
+              {listing.provider_name}
+            </span>
             {listing.is_verified && (
               <span className="shrink-0 rounded-full bg-green/8 px-1.5 py-0.5 text-[10px] font-medium text-green">
                 Verified
               </span>
             )}
           </div>
-          <p className="mt-0.5 line-clamp-2 text-sm text-slate">{listing.pitch}</p>
+          <p className="mt-0.5 line-clamp-2 text-sm text-slate">
+            {listing.pitch}
+          </p>
+
+          {(listing.location ||
+            listing.licensed_insured ||
+            listing.availability ||
+            listing.starting_hourly_rate_cents ||
+            listing.min_project_cents) && (
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate">
+              {listing.location && (
+                <span className="font-bold">{listing.location}</span>
+              )}
+
+              {listing.starting_hourly_rate_cents && (
+                <span className="rounded-full bg-canvas px-1.5 py-0.5 font-medium text-ink">
+                  From{" "}
+                  {formatCentsAsDollars(listing.starting_hourly_rate_cents)}/hr
+                </span>
+              )}
+              {listing.min_project_cents && (
+                <span className="rounded-full bg-canvas px-1.5 py-0.5 font-medium text-ink">
+                  {formatCentsAsDollars(listing.min_project_cents)} min project
+                </span>
+              )}
+            </div>
+          )}
+
           <p className="mt-1.5 text-xs text-slate">
-            {formatTimeSince(listing.claimed_at)} <span className="text-green">●</span>{" "}
-            <span className="font-semibold text-ink">{listing.click_count.toLocaleString()} clicks</span>
+            {formatTimeSince(listing.claimed_at)}{" "}
+            <span className="text-green">●</span>{" "}
+            <span className="font-semibold text-ink">
+              {listing.click_count.toLocaleString()} clicks
+            </span>
           </p>
         </div>
 
@@ -80,7 +124,13 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
         >
           {formatCentsAsDollars(listing.bid_amount_cents)}
         </span>
-      </a>
+      </ListingOutboundLink>
+
+      {/* Sibling of the outbound link above, never nested inside it - see
+          ListingInfoPill's own comment for why. Sits at the row's own
+          bottom-right corner (the row is `relative`), clear of the price
+          which lives at the top of the <a>'s flex row. */}
+      <ListingInfoPill listing={listing} />
 
       {/* "Report this listing" is turned off for now - component/API/table
           are all still intact, just not rendered. Re-add the div below to

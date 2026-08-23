@@ -1,7 +1,7 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { encryptManageToken, generateManageToken, hashManageToken } from "@/lib/manage-token";
 import { normalizeUrlKey } from "@/lib/link-policy";
-import type { CategoryPricing, Listing, ListingWithRank } from "@/lib/db/types";
+import type { Availability, CategoryPricing, Listing, ListingWithRank } from "@/lib/db/types";
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -112,6 +112,13 @@ export interface CreatePendingListingInput {
   destinationLink: string;
   logoUrl?: string | null;
   bidAmountCents: number;
+  location: string;
+  licensedInsured: boolean;
+  yearsInBusiness?: number | null;
+  availability?: Availability | null;
+  specialtyTags?: string | null;
+  startingHourlyRateCents?: number | null;
+  minProjectCents?: number | null;
 }
 
 /**
@@ -139,6 +146,13 @@ export async function createPendingListing(
       status: "pending_payment",
       manage_token_hash: hashManageToken(rawManageToken),
       manage_token_encrypted: encryptManageToken(rawManageToken),
+      location: input.location,
+      licensed_insured: input.licensedInsured,
+      years_in_business: input.yearsInBusiness ?? null,
+      availability: input.availability ?? null,
+      specialty_tags: input.specialtyTags ?? null,
+      starting_hourly_rate_cents: input.startingHourlyRateCents ?? null,
+      min_project_cents: input.minProjectCents ?? null,
     })
     .select("*")
     .single();
@@ -178,6 +192,13 @@ export interface ListingContentUpdate {
   pitch: string;
   destinationLink: string;
   logoUrl?: string | null;
+  location: string;
+  licensedInsured: boolean;
+  yearsInBusiness?: number | null;
+  availability?: Availability | null;
+  specialtyTags?: string | null;
+  startingHourlyRateCents?: number | null;
+  minProjectCents?: number | null;
 }
 
 /** Edits content only - no payment involved, doesn't touch bid_amount_cents/status/rank. */
@@ -191,6 +212,13 @@ export async function updateListingContent(listingId: string, update: ListingCon
       destination_link: update.destinationLink,
       destination_link_key: normalizeUrlKey(update.destinationLink),
       ...(update.logoUrl !== undefined ? { logo_url: update.logoUrl } : {}),
+      location: update.location,
+      licensed_insured: update.licensedInsured,
+      years_in_business: update.yearsInBusiness ?? null,
+      availability: update.availability ?? null,
+      specialty_tags: update.specialtyTags ?? null,
+      starting_hourly_rate_cents: update.startingHourlyRateCents ?? null,
+      min_project_cents: update.minProjectCents ?? null,
     })
     .eq("id", listingId)
     .select("*")

@@ -6,6 +6,7 @@ export type ListingStatus = "pending_payment" | "published" | "unpublished";
 export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
 export type PaymentProvider = "lemonsqueezy" | "manual";
 export type ReportStatus = "open" | "reviewed" | "dismissed";
+export type Availability = "standard_hours" | "same_day" | "24_7";
 
 // These are `type`, not `interface`, on purpose: the Database.Tables/Views
 // entries below need to structurally satisfy supabase-js's
@@ -42,6 +43,16 @@ export type Listing = {
   claimed_at: string | null;
   created_at: string;
   updated_at: string;
+  /** Free text, e.g. "Austin, TX" - required going forward at the app layer (see validateListingContent), nullable here since old rows predate it. */
+  location: string | null;
+  licensed_insured: boolean;
+  years_in_business: number | null;
+  availability: Availability | null;
+  /** Simple comma-separated free text (e.g. "EV chargers, panel upgrades") - not a taxonomy. */
+  specialty_tags: string | null;
+  /** "Starting at" framing, not a locked quote - see supabase/migrations/0012_provider_pricing_fields.sql. */
+  starting_hourly_rate_cents: number | null;
+  min_project_cents: number | null;
 };
 
 /** A row from the `listing_ranks` view: a published listing plus its computed rank. */

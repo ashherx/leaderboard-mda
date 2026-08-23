@@ -102,6 +102,15 @@ export default async function ManageListingPage({ params }: { params: { token: s
           initialProviderName={listing.provider_name}
           initialPitch={listing.pitch}
           initialDestinationLink={listing.destination_link}
+          initialLocation={listing.location ?? ""}
+          initialLicensedInsured={listing.licensed_insured}
+          initialYearsInBusiness={listing.years_in_business}
+          initialAvailability={listing.availability}
+          initialSpecialtyTags={listing.specialty_tags ?? ""}
+          initialStartingHourlyRateDollars={
+            listing.starting_hourly_rate_cents !== null ? listing.starting_hourly_rate_cents / 100 : null
+          }
+          initialMinProjectDollars={listing.min_project_cents !== null ? listing.min_project_cents / 100 : null}
         />
       </div>
 

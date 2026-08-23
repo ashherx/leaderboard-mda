@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { submitListingAndCheckout } from "@/lib/checkout";
 import { isOwnStorageUrl, uploadListingLogo } from "@/lib/storage";
+import type { Availability } from "@/lib/db/types";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -12,6 +13,17 @@ export async function POST(request: Request) {
   const bidDollars = Number(formData.get("bidDollars"));
   const logo = formData.get("logo");
   const prefilledLogoUrl = formData.get("logoUrl");
+
+  const location = String(formData.get("location") ?? "");
+  const licensedInsured = String(formData.get("licensedInsured") ?? "") === "yes";
+  const yearsInBusinessRaw = formData.get("yearsInBusiness");
+  const yearsInBusiness = yearsInBusinessRaw ? Number(yearsInBusinessRaw) : null;
+  const availability = (String(formData.get("availability") ?? "") || null) as Availability | null;
+  const specialtyTags = String(formData.get("specialtyTags") ?? "") || null;
+  const startingHourlyRateRaw = formData.get("startingHourlyRateDollars");
+  const startingHourlyRateDollars = startingHourlyRateRaw ? Number(startingHourlyRateRaw) : null;
+  const minProjectRaw = formData.get("minProjectDollars");
+  const minProjectDollars = minProjectRaw ? Number(minProjectRaw) : null;
 
   let logoUrl: string | null = null;
   if (logo instanceof File && logo.size > 0) {
@@ -34,6 +46,13 @@ export async function POST(request: Request) {
     destinationLink,
     logoUrl,
     bidDollars,
+    location,
+    licensedInsured,
+    yearsInBusiness,
+    availability,
+    specialtyTags,
+    startingHourlyRateDollars,
+    minProjectDollars,
   });
 
   if (!result.ok) {

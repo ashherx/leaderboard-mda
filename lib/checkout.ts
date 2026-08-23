@@ -11,20 +11,55 @@ import { createPendingPayment, markPaymentCompletedById } from "@/lib/db/payment
 import { normalizeUrlKey, validateDestinationLink } from "@/lib/link-policy";
 import { createBidCheckout } from "@/lib/lemonsqueezy/checkout";
 import { getRequestOrigin } from "@/lib/request-origin";
+import type { Availability } from "@/lib/db/types";
+
+const AVAILABILITY_VALUES: Availability[] = ["standard_hours", "same_day", "24_7"];
+const MAX_LOCATION_LENGTH = 80;
+const MAX_SPECIALTY_TAGS_LENGTH = 140;
+
+/** Optional whole-dollar figure (starting hourly rate / min project size) -> cents, or null if omitted. */
+function toOptionalWholeDollarCents(dollars: number | null | undefined): number | null | "invalid" {
+  if (dollars === null || dollars === undefined) return null;
+  if (!Number.isInteger(dollars) || dollars <= 0) return "invalid";
+  return dollars * 100;
+}
 
 export interface ListingContentInput {
   providerName: string;
   pitch: string;
   destinationLink: string;
   logoUrl?: string | null;
+  /** "Austin, TX" style free text - required (see validateListingContent). */
+  location: string;
+  /** Required explicit yes/no - never silently defaulted (see components/ListingSubmissionForm.tsx). */
+  licensedInsured: boolean;
+  yearsInBusiness?: number | null;
+  availability?: Availability | null;
+  specialtyTags?: string | null;
+  /** Whole-dollar "starting at" figure, not a locked quote - converted to cents below. */
+  startingHourlyRateDollars?: number | null;
+  minProjectDollars?: number | null;
 }
 
 /** Shared by both initial submission and manage-page edits - same rules either way. */
-function validateListingContent(
-  input: ListingContentInput
-): { ok: true; providerName: string; pitch: string; destinationLink: string } | { ok: false; error: string } {
+function validateListingContent(input: ListingContentInput):
+  | {
+      ok: true;
+      providerName: string;
+      pitch: string;
+      destinationLink: string;
+      location: string;
+      licensedInsured: boolean;
+      yearsInBusiness: number | null;
+      availability: Availability | null;
+      specialtyTags: string | null;
+      startingHourlyRateCents: number | null;
+      minProjectCents: number | null;
+    }
+  | { ok: false; error: string } {
   const providerName = input.providerName.trim();
   const pitch = input.pitch.trim();
+  const location = input.location.trim();
 
   if (!providerName || providerName.length > 80) {
     return { ok: false, error: "Provider name is required (80 characters max)." };
@@ -32,11 +67,51 @@ function validateListingContent(
   if (!pitch || pitch.length > 140) {
     return { ok: false, error: "One-line pitch is required (140 characters max)." };
   }
+  if (!location || location.length > MAX_LOCATION_LENGTH) {
+    return { ok: false, error: `Location is required (${MAX_LOCATION_LENGTH} characters max).` };
+  }
 
   const linkCheck = validateDestinationLink(input.destinationLink);
   if (!linkCheck.ok) return { ok: false, error: linkCheck.error };
 
-  return { ok: true, providerName, pitch, destinationLink: linkCheck.url };
+  const yearsInBusiness = input.yearsInBusiness ?? null;
+  if (yearsInBusiness !== null && (!Number.isInteger(yearsInBusiness) || yearsInBusiness < 0 || yearsInBusiness > 150)) {
+    return { ok: false, error: "Years in business must be a whole number between 0 and 150." };
+  }
+
+  const availability = input.availability ?? null;
+  if (availability !== null && !AVAILABILITY_VALUES.includes(availability)) {
+    return { ok: false, error: "Invalid availability value." };
+  }
+
+  const specialtyTags = input.specialtyTags?.trim() || null;
+  if (specialtyTags && specialtyTags.length > MAX_SPECIALTY_TAGS_LENGTH) {
+    return { ok: false, error: `Specialty tags are ${MAX_SPECIALTY_TAGS_LENGTH} characters max.` };
+  }
+
+  const startingHourlyRateCents = toOptionalWholeDollarCents(input.startingHourlyRateDollars);
+  if (startingHourlyRateCents === "invalid") {
+    return { ok: false, error: "Starting hourly rate must be a whole-dollar amount greater than $0." };
+  }
+
+  const minProjectCents = toOptionalWholeDollarCents(input.minProjectDollars);
+  if (minProjectCents === "invalid") {
+    return { ok: false, error: "Minimum project size must be a whole-dollar amount greater than $0." };
+  }
+
+  return {
+    ok: true,
+    providerName,
+    pitch,
+    destinationLink: linkCheck.url,
+    location,
+    licensedInsured: input.licensedInsured,
+    yearsInBusiness,
+    availability,
+    specialtyTags,
+    startingHourlyRateCents,
+    minProjectCents,
+  };
 }
 
 /**
@@ -177,6 +252,13 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
     destinationLink: content.destinationLink,
     logoUrl: input.logoUrl ?? null,
     bidAmountCents,
+    location: content.location,
+    licensedInsured: content.licensedInsured,
+    yearsInBusiness: content.yearsInBusiness,
+    availability: content.availability,
+    specialtyTags: content.specialtyTags,
+    startingHourlyRateCents: content.startingHourlyRateCents,
+    minProjectCents: content.minProjectCents,
   });
 
   const { checkoutUrl, paymentId } = await startLemonSqueezyCheckout(
@@ -211,6 +293,13 @@ export async function editListingViaToken(
     pitch: content.pitch,
     destinationLink: content.destinationLink,
     logoUrl: input.logoUrl,
+    location: content.location,
+    licensedInsured: content.licensedInsured,
+    yearsInBusiness: content.yearsInBusiness,
+    availability: content.availability,
+    specialtyTags: content.specialtyTags,
+    startingHourlyRateCents: content.startingHourlyRateCents,
+    minProjectCents: content.minProjectCents,
   });
 
   const rank = await getListingRank(listing.id);
