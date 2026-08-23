@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { withUtmSource } from "@/lib/link-policy";
 
 /**
  * Wraps a listing's outbound link. `href` still points at the /r/[id]
@@ -41,7 +42,7 @@ export function ListingOutboundLink({
           /* best-effort - a dropped click log never blocks the visitor */
         });
 
-        window.open(destinationLink, "_blank", "noopener,noreferrer");
+        window.open(withUtmSource(destinationLink), "_blank", "noopener,noreferrer");
       }}
     >
       {children}

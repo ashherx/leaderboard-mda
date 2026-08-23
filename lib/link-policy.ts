@@ -54,3 +54,21 @@ export function normalizeUrlKey(url: string): string {
   const path = parsed.pathname.replace(/\/+$/, "");
   return `${host}${path}`.toLowerCase();
 }
+
+/**
+ * Tags an outbound destination link with utm_source=podium so a provider's
+ * own analytics can attribute the visit back to us - applied at the moment a
+ * listing is actually sent out (see app/r/[id]/route.ts and
+ * ListingOutboundLink), never on the stored destination_link itself, so the
+ * provider's saved URL stays exactly what they entered. Only ever set if the
+ * provider's link doesn't already carry a utm_source of its own - we
+ * shouldn't override one they've deliberately chosen (e.g. if they've pasted
+ * a link that's itself tagged for a different campaign).
+ */
+export function withUtmSource(url: string): string {
+  const parsed = new URL(url);
+  if (!parsed.searchParams.has("utm_source")) {
+    parsed.searchParams.set("utm_source", "podium");
+  }
+  return parsed.toString();
+}

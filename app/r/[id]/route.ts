@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPublishedListingById, incrementClickCount } from "@/lib/db/listings";
 import { recordClickEvent } from "@/lib/db/activity";
+import { withUtmSource } from "@/lib/link-policy";
 
 /**
  * Click-through redirect: every listing's outbound link on the leaderboard
@@ -29,5 +30,5 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 
   await Promise.all([incrementClickCount(listing.id), recordClickEvent(listing.id, listing.category_id)]);
 
-  return NextResponse.redirect(target, { status: 302 });
+  return NextResponse.redirect(withUtmSource(target.toString()), { status: 302 });
 }
