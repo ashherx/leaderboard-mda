@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Inter, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { LemonSqueezyScript } from "@/components/LemonSqueezyScript";
+import { OG_IMAGE, OPEN_GRAPH_SITE_DEFAULTS, SITE_NAME } from "@/lib/site";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -36,28 +37,50 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   icons: { icon: "/the-podium-logo-2.svg" },
   // Site-wide fallback share image - any page that doesn't set its own
-  // openGraph.images (e.g. via generateMetadata, as the homepage does per
-  // category through /api/og) still gets a real preview instead of none.
-  // Next merges metadata top-down, so the homepage's per-category image
-  // still wins there; this only fills the gap everywhere else.
+  // openGraph (e.g. app/rules, app/terms, ...) still gets a real preview
+  // instead of none. This does NOT apply to app/page.tsx, though: Next only
+  // inherits a whole openGraph/twitter object from here when a route
+  // doesn't define its own at all, and the homepage's generateMetadata
+  // always returns its own (title/description/images vary per category) -
+  // that replaces this object rather than merging with it, so
+  // OPEN_GRAPH_SITE_DEFAULTS below is spread into its return too (see
+  // lib/site.ts and app/page.tsx) rather than relying on inheritance.
+  //
+  // Facebook, LinkedIn, WhatsApp, Discord, and Slack's link-unfurlers all
+  // read this same standard Open Graph block (there's no per-platform tag
+  // set to add) - `url`/`locale`/`siteName` and the image's declared
+  // width+height+alt are what make FB/LinkedIn's parsers and Discord's
+  // embed render confidently instead of falling back to a generic/blank
+  // card. Slack and WhatsApp are the least picky (title+description+image
+  // is enough for either), so nothing extra is needed for them specifically.
   openGraph: {
-    type: "website",
-    siteName: "The Podium",
-    title: "The Podium",
+    ...OPEN_GRAPH_SITE_DEFAULTS,
+    url: "/",
+    title: SITE_NAME,
     description: DESCRIPTION,
-    images: [{ url: "/open-graph-image.png", width: 1440, height: 1080 }],
+    images: [{ ...OG_IMAGE, alt: SITE_NAME }],
   },
+  // Discord and Slack both also check twitter:card - without it they fall
+  // back to a small thumbnail instead of the large image treatment even
+  // though the openGraph tags above are otherwise complete.
   twitter: {
     card: "summary_large_image",
-    title: "The Podium",
+    title: SITE_NAME,
     description: DESCRIPTION,
-    images: ["/open-graph-image.png"],
+    images: [{ url: OG_IMAGE.url, alt: SITE_NAME }],
   },
   // Explicit allow (belt-and-suspenders alongside robots.ts) - nothing here
   // is paywalled/private, and Google's AI-training crawler (Google-Extended)
   // is covered by robots.ts, not this per-page directive, which only
   // controls indexing/snippets.
   robots: { index: true, follow: true },
+};
+
+// themeColor lives here (not in `metadata` above) since Next 14 moved it out
+// of the Metadata object into its own export - this is what colors Discord's
+// embed accent strip and a mobile browser's own chrome/tab color.
+export const viewport: Viewport = {
+  themeColor: "#e3a23c", // matches --color-gold in globals.css
 };
 
 export default function RootLayout({

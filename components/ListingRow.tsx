@@ -79,8 +79,15 @@ export function ListingRow({
         )}
 
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-2">
-            <span className="font-display text-base font-bold text-ink">
+          <div className="flex flex-wrap items-start gap-2">
+            {/* min-w-0 is load-bearing here, not decorative: a flex item's
+                default min-width is its content's natural (unwrapped)
+                width, which overrides line-clamp/overflow entirely - without
+                it a long, unbroken business name (e.g. an SEO-title-style
+                name pulled in from url-metadata prefill) stretches the row
+                instead of wrapping/clamping, which is what was pushing the
+                price out of alignment on narrow screens. */}
+            <span className="min-w-0 flex-1 line-clamp-2 font-display text-base font-bold text-ink">
               {listing.provider_name}
             </span>
             {listing.is_verified && (
