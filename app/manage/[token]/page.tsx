@@ -100,7 +100,7 @@ export default async function ManageListingPage({ params }: { params: { token: s
         <ManageEditForm
           token={params.token}
           initialProviderName={listing.provider_name}
-          initialPitch={listing.pitch}
+          initialPitch={listing.pitch ?? ""}
           initialDestinationLink={listing.destination_link}
           initialLocation={listing.location ?? ""}
           initialLicensedInsured={listing.licensed_insured}

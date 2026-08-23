@@ -26,13 +26,14 @@ function toOptionalWholeDollarCents(dollars: number | null | undefined): number 
 
 export interface ListingContentInput {
   providerName: string;
+  /** Optional - blank becomes null (see validateListingContent). */
   pitch: string;
   destinationLink: string;
   logoUrl?: string | null;
-  /** "Austin, TX" style free text - required (see validateListingContent). */
+  /** "Austin, TX" style free text, optional - blank becomes null (see validateListingContent). */
   location: string;
-  /** Required explicit yes/no - never silently defaulted (see components/ListingSubmissionForm.tsx). */
-  licensedInsured: boolean;
+  /** Tri-state and optional: true (yes), false (no), or null (not specified) - see components/ListingSubmissionForm.tsx. */
+  licensedInsured: boolean | null;
   yearsInBusiness?: number | null;
   availability?: Availability | null;
   specialtyTags?: string | null;
@@ -41,15 +42,18 @@ export interface ListingContentInput {
   minProjectDollars?: number | null;
 }
 
+/** What a manage-page edit is allowed to touch - notably not destinationLink, see editListingViaToken. */
+export type ListingEditInput = Omit<ListingContentInput, "destinationLink">;
+
 /** Shared by both initial submission and manage-page edits - same rules either way. */
 function validateListingContent(input: ListingContentInput):
   | {
       ok: true;
       providerName: string;
-      pitch: string;
+      pitch: string | null;
       destinationLink: string;
-      location: string;
-      licensedInsured: boolean;
+      location: string | null;
+      licensedInsured: boolean | null;
       yearsInBusiness: number | null;
       availability: Availability | null;
       specialtyTags: string | null;
@@ -58,17 +62,17 @@ function validateListingContent(input: ListingContentInput):
     }
   | { ok: false; error: string } {
   const providerName = input.providerName.trim();
-  const pitch = input.pitch.trim();
-  const location = input.location.trim();
+  const pitch = input.pitch.trim() || null;
+  const location = input.location.trim() || null;
 
   if (!providerName || providerName.length > 80) {
     return { ok: false, error: "Provider name is required (80 characters max)." };
   }
-  if (!pitch || pitch.length > 140) {
-    return { ok: false, error: "One-line pitch is required (140 characters max)." };
+  if (pitch && pitch.length > 140) {
+    return { ok: false, error: "One-line pitch is 140 characters max." };
   }
-  if (!location || location.length > MAX_LOCATION_LENGTH) {
-    return { ok: false, error: `Location is required (${MAX_LOCATION_LENGTH} characters max).` };
+  if (location && location.length > MAX_LOCATION_LENGTH) {
+    return { ok: false, error: `Location is ${MAX_LOCATION_LENGTH} characters max.` };
   }
 
   const linkCheck = validateDestinationLink(input.destinationLink);
@@ -280,12 +284,20 @@ export type ManageActionResult =
 /** Edits a listing's content via its manage-token. No payment involved - bid/rank/status are untouched. */
 export async function editListingViaToken(
   rawToken: string,
-  input: ListingContentInput
+  input: ListingEditInput
 ): Promise<ManageActionResult> {
   const listing = await getListingByManageToken(rawToken);
   if (!listing) return { ok: false, error: "Invalid or expired link." };
 
-  const content = validateListingContent(input);
+  // destinationLink is deliberately not part of ListingEditInput and always
+  // sourced from the listing's own row here, never from the caller - a
+  // provider who's earned rank/clicks under one URL shouldn't be able to
+  // quietly swap the link out from under that reputation and turn the
+  // listing into an ad for a different site entirely. (Changing where a
+  // listing points is legitimately a different, more sensitive action than
+  // editing its name/pitch/etc., so it isn't exposed as a self-serve edit at
+  // all right now - see components/ManageEditForm.tsx.)
+  const content = validateListingContent({ ...input, destinationLink: listing.destination_link });
   if (!content.ok) return content;
 
   await updateListingContent(listing.id, {

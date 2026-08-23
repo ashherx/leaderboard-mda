@@ -26,7 +26,14 @@ const AVAILABILITY_LABELS: Record<string, string> = {
   "24_7": "24/7 emergency",
 };
 
-export function ListingRow({ listing }: { listing: ListingWithRank }) {
+export function ListingRow({
+  listing,
+  categoryName,
+}: {
+  listing: ListingWithRank;
+  /** Shown only on the "All" merged feed (see LeaderboardBrowser) - a single-category board doesn't need to repeat its own name on every row. */
+  categoryName?: string;
+}) {
   const isTopThree = listing.rank <= 3;
 
   return (
@@ -81,10 +88,13 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
                 Verified
               </span>
             )}
+            {categoryName && (
+              <span className="shrink-0 rounded-full bg-canvas px-1.5 py-0.5 text-[10px] font-medium text-slate">
+                {categoryName}
+              </span>
+            )}
           </div>
-          <p className="mt-0.5 line-clamp-2 text-sm text-slate">
-            {listing.pitch}
-          </p>
+          {listing.pitch && <p className="mt-0.5 line-clamp-2 text-sm text-slate">{listing.pitch}</p>}
 
           {(listing.location ||
             listing.licensed_insured ||
@@ -112,7 +122,7 @@ export function ListingRow({ listing }: { listing: ListingWithRank }) {
 
           <p className="mt-1.5 text-xs text-slate">
             {formatTimeSince(listing.claimed_at)}{" "}
-            <span className="text-green">●</span>{" "}
+            <span className="ml-2 text-green">●</span>{" "}
             <span className="font-semibold text-ink">
               {listing.click_count.toLocaleString()} clicks
             </span>

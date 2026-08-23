@@ -21,17 +21,43 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const DESCRIPTION =
+  "The Podium, by Million Dollar Agency - pay-to-rank leaderboards for service providers, ranked purely by who's paid the most.";
+
 export const metadata: Metadata = {
   // No production domain decided yet - set NEXT_PUBLIC_SITE_URL once there is
-  // one, so social share images resolve to real absolute URLs.
+  // one, so social share images/canonical URLs resolve to real absolute URLs
+  // instead of localhost (this also feeds robots.ts/sitemap.ts).
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
     default: "The Podium",
     template: "%s - The Podium",
   },
-  description:
-    "The Podium, by Million Dollar Agency - pay-to-rank leaderboards for service providers, ranked purely by who's paid the most.",
+  description: DESCRIPTION,
   icons: { icon: "/the-podium-logo-2.svg" },
+  // Site-wide fallback share image - any page that doesn't set its own
+  // openGraph.images (e.g. via generateMetadata, as the homepage does per
+  // category through /api/og) still gets a real preview instead of none.
+  // Next merges metadata top-down, so the homepage's per-category image
+  // still wins there; this only fills the gap everywhere else.
+  openGraph: {
+    type: "website",
+    siteName: "The Podium",
+    title: "The Podium",
+    description: DESCRIPTION,
+    images: [{ url: "/open-graph-image.png", width: 1440, height: 1080 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Podium",
+    description: DESCRIPTION,
+    images: ["/open-graph-image.png"],
+  },
+  // Explicit allow (belt-and-suspenders alongside robots.ts) - nothing here
+  // is paywalled/private, and Google's AI-training crawler (Google-Extended)
+  // is covered by robots.ts, not this per-page directive, which only
+  // controls indexing/snippets.
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

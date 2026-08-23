@@ -36,6 +36,34 @@ export async function listPublishedListingsForCategory(
   return { listings: data, page, pageSize, total: count ?? 0 };
 }
 
+/**
+ * Every published listing across every category, merged into one feed for
+ * the "All" tab (see lib/all-categories.ts) - same sort as a single
+ * category's board (bid_amount_cents desc, claimed_at asc, id asc), just
+ * without the `category_id` filter. Each row keeps its own real
+ * per-category `rank` from the view; nothing here computes a new
+ * cross-category rank (see listing_ranks in migration 0001 for why that'd
+ * be misleading).
+ */
+export async function listPublishedListingsAcrossAllCategories(
+  { page = 1, pageSize = DEFAULT_PAGE_SIZE }: { page?: number; pageSize?: number } = {}
+): Promise<PaginatedListings> {
+  const supabase = getSupabaseServerClient();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
+    .from("listing_ranks")
+    .select("*", { count: "exact" })
+    .order("bid_amount_cents", { ascending: false })
+    .order("claimed_at", { ascending: true })
+    .order("id", { ascending: true })
+    .range(from, to);
+
+  if (error) throw error;
+  return { listings: data, page, pageSize, total: count ?? 0 };
+}
+
 /** What it costs right now to become #1, plus the category's floor price. */
 export async function getCategoryPricing(categoryId: string, minBidCents: number): Promise<CategoryPricing> {
   const supabase = getSupabaseServerClient();
@@ -108,12 +136,12 @@ export async function previewRankForBid(categoryId: string, bidAmountCents: numb
 export interface CreatePendingListingInput {
   categoryId: string;
   providerName: string;
-  pitch: string;
+  pitch: string | null;
   destinationLink: string;
   logoUrl?: string | null;
   bidAmountCents: number;
-  location: string;
-  licensedInsured: boolean;
+  location: string | null;
+  licensedInsured: boolean | null;
   yearsInBusiness?: number | null;
   availability?: Availability | null;
   specialtyTags?: string | null;
@@ -189,11 +217,11 @@ export async function publishListing(listingId: string, bidAmountCents?: number)
 
 export interface ListingContentUpdate {
   providerName: string;
-  pitch: string;
+  pitch: string | null;
   destinationLink: string;
   logoUrl?: string | null;
-  location: string;
-  licensedInsured: boolean;
+  location: string | null;
+  licensedInsured: boolean | null;
   yearsInBusiness?: number | null;
   availability?: Availability | null;
   specialtyTags?: string | null;

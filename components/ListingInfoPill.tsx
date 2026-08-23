@@ -160,7 +160,7 @@ export function ListingInfoPill({ listing }: { listing: ListingWithRank }) {
               </div>
             </div>
 
-            <p className="mt-3 text-xs text-slate">{listing.pitch}</p>
+            {listing.pitch && <p className="mt-3 text-xs text-slate">{listing.pitch}</p>}
 
             <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
               {listing.licensed_insured && (

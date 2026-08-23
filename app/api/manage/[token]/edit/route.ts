@@ -9,11 +9,16 @@ export async function POST(request: Request, { params }: { params: { token: stri
 
   const providerName = String(formData.get("providerName") ?? "");
   const pitch = String(formData.get("pitch") ?? "");
-  const destinationLink = String(formData.get("destinationLink") ?? "");
+  // destinationLink is deliberately not read here - it's not an editable
+  // field on the manage page (see editListingViaToken for why), so any
+  // "destinationLink" a caller sends is simply ignored rather than trusted.
   const logo = formData.get("logo");
 
   const location = String(formData.get("location") ?? "");
-  const licensedInsured = String(formData.get("licensedInsured") ?? "") === "yes";
+  // Tri-state: "yes" -> true, "no" -> false, anything else (field omitted
+  // entirely, since neither checkbox is checked) -> null/not specified.
+  const licensedInsuredRaw = formData.get("licensedInsured");
+  const licensedInsured = licensedInsuredRaw === "yes" ? true : licensedInsuredRaw === "no" ? false : null;
   const yearsInBusinessRaw = formData.get("yearsInBusiness");
   const yearsInBusiness = yearsInBusinessRaw ? Number(yearsInBusinessRaw) : null;
   const availability = (String(formData.get("availability") ?? "") || null) as Availability | null;
@@ -39,7 +44,6 @@ export async function POST(request: Request, { params }: { params: { token: stri
   const result = await editListingViaToken(params.token, {
     providerName,
     pitch,
-    destinationLink,
     logoUrl,
     location,
     licensedInsured,

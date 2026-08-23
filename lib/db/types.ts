@@ -29,7 +29,7 @@ export type Listing = {
   id: string;
   category_id: string;
   provider_name: string;
-  pitch: string;
+  pitch: string | null;
   destination_link: string;
   /** Normalized copy of destination_link for duplicate-URL lookup - see lib/link-policy.ts's normalizeUrlKey. */
   destination_link_key: string | null;
@@ -45,7 +45,7 @@ export type Listing = {
   updated_at: string;
   /** Free text, e.g. "Austin, TX" - required going forward at the app layer (see validateListingContent), nullable here since old rows predate it. */
   location: string | null;
-  licensed_insured: boolean;
+  licensed_insured: boolean | null;
   years_in_business: number | null;
   availability: Availability | null;
   /** Simple comma-separated free text (e.g. "EV chargers, panel upgrades") - not a taxonomy. */

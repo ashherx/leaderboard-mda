@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PaymentDisclaimer } from "@/components/PaymentDisclaimer";
+import { SUPPORT_EMAIL } from "@/lib/site";
+import { LicensedInsuredToggle } from "@/components/LicensedInsuredToggle";
 
 const PITCH_MAX_LENGTH = 140;
 
@@ -30,6 +32,7 @@ export function ListingSubmissionForm({
   const [pitch, setPitch] = useState("");
   const [bidDollars, setBidDollars] = useState(String(initialBidDollars));
   const [location, setLocation] = useState("");
+  const [licensedInsured, setLicensedInsured] = useState<boolean | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,6 +136,17 @@ export function ListingSubmissionForm({
           Your site, portfolio, or booking page - no chat/invite links.
           {fetchingMetadata && " Fetching info from this link…"}
         </p>
+        {/* This is the one moment the destination link is ever set - it's
+            locked once the listing is live (see ManageEditForm /
+            editListingViaToken's comment for why), so make that clear
+            up front rather than surprising them later. */}
+        <p className="mt-1 text-xs text-slate">
+          Choose carefully - this can&apos;t be changed once your listing is live. Email{" "}
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="underline hover:text-ink">
+            {SUPPORT_EMAIL}
+          </a>{" "}
+          if it ever needs to move.
+        </p>
       </div>
 
       <div>
@@ -149,6 +163,7 @@ export function ListingSubmissionForm({
             nameTouched.current = true;
             setProviderName(e.target.value);
           }}
+          placeholder={fetchingMetadata ? "Fetching info from this link…" : undefined}
           className="mt-1 w-full rounded-md border border-border px-3 py-2 text-ink outline-none focus:border-green"
         />
       </div>
@@ -156,7 +171,7 @@ export function ListingSubmissionForm({
       <div>
         <div className="flex items-center justify-between">
           <label htmlFor="pitch" className="block text-sm font-medium text-ink">
-            One-line pitch
+            One-line pitch <span className="font-normal text-slate">(optional)</span>
           </label>
           <span className="font-mono text-xs text-slate">
             {pitch.length}/{PITCH_MAX_LENGTH}
@@ -165,26 +180,24 @@ export function ListingSubmissionForm({
         <input
           id="pitch"
           name="pitch"
-          required
           maxLength={PITCH_MAX_LENGTH}
           value={pitch}
           onChange={(e) => {
             pitchTouched.current = true;
             setPitch(e.target.value);
           }}
-          placeholder="What you do, in one sentence."
+          placeholder={fetchingMetadata ? "Fetching info from this link…" : "What you do, in one sentence."}
           className="mt-1 w-full rounded-md border border-border px-3 py-2 text-ink outline-none focus:border-green"
         />
       </div>
 
       <div>
         <label htmlFor="location" className="block text-sm font-medium text-ink">
-          Location
+          Location <span className="font-normal text-slate">(optional)</span>
         </label>
         <input
           id="location"
           name="location"
-          required
           maxLength={80}
           value={location}
           onChange={(e) => setLocation(e.target.value)}
@@ -194,19 +207,7 @@ export function ListingSubmissionForm({
         <p className="mt-1 text-xs text-slate">Blue-collar work is local - shown on your card so nearby buyers know it's you.</p>
       </div>
 
-      <div>
-        <span className="block text-sm font-medium text-ink">Licensed &amp; insured?</span>
-        <div className="mt-1 flex gap-4">
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input type="radio" name="licensedInsured" value="yes" required />
-            Yes
-          </label>
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input type="radio" name="licensedInsured" value="no" required />
-            No
-          </label>
-        </div>
-      </div>
+      <LicensedInsuredToggle value={licensedInsured} onChange={setLicensedInsured} />
 
       <div>
         <label htmlFor="logo" className="block text-sm font-medium text-ink">

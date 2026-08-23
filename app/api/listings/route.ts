@@ -15,7 +15,10 @@ export async function POST(request: Request) {
   const prefilledLogoUrl = formData.get("logoUrl");
 
   const location = String(formData.get("location") ?? "");
-  const licensedInsured = String(formData.get("licensedInsured") ?? "") === "yes";
+  // Tri-state: "yes" -> true, "no" -> false, anything else (field omitted
+  // entirely, since neither checkbox is checked) -> null/not specified.
+  const licensedInsuredRaw = formData.get("licensedInsured");
+  const licensedInsured = licensedInsuredRaw === "yes" ? true : licensedInsuredRaw === "no" ? false : null;
   const yearsInBusinessRaw = formData.get("yearsInBusiness");
   const yearsInBusiness = yearsInBusinessRaw ? Number(yearsInBusinessRaw) : null;
   const availability = (String(formData.get("availability") ?? "") || null) as Availability | null;

@@ -1,4 +1,8 @@
-import { getCategoryPricing, listPublishedListingsForCategory } from "@/lib/db/listings";
+import {
+  getCategoryPricing,
+  listPublishedListingsAcrossAllCategories,
+  listPublishedListingsForCategory,
+} from "@/lib/db/listings";
 import { getLatestActivity, getTrendingListings } from "@/lib/db/activity";
 import type { ActivityItem, TrendingListing } from "@/lib/db/activity";
 import type { CategoryPricing, ListingWithRank } from "@/lib/db/types";
@@ -35,4 +39,29 @@ export async function getCategoryBrowseData(
   ]);
 
   return { listings, total, page, pageSize: PAGE_SIZE, pricing, trending, latestActivity };
+}
+
+/**
+ * The "All" tab's browse data (see lib/all-categories.ts) - same
+ * CategoryBrowseData shape as a single category so LeaderboardBrowser and
+ * its children don't need a second data shape to branch on, but `pricing`
+ * is a meaningless stub (there's no single "become #1" price across
+ * categories with different floors) and trending/latest-activity are empty:
+ * both are genuinely category-scoped concepts (see getTrendingListings/
+ * getLatestActivity), and the merged listing feed already serves discovery
+ * here on its own. The UI hides the panels that would've used those stubs
+ * (see LeaderboardBrowser) rather than pretending they mean something.
+ */
+export async function getAllCategoriesBrowseData(page: number): Promise<CategoryBrowseData> {
+  const { listings, total } = await listPublishedListingsAcrossAllCategories({ page, pageSize: PAGE_SIZE });
+
+  return {
+    listings,
+    total,
+    page,
+    pageSize: PAGE_SIZE,
+    pricing: { currentTopCents: null, claimFirstPriceCents: 0, minBidCents: 0 },
+    trending: [],
+    latestActivity: [],
+  };
 }

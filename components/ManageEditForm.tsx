@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Availability } from "@/lib/db/types";
+import { SUPPORT_EMAIL } from "@/lib/site";
+import { LicensedInsuredToggle } from "@/components/LicensedInsuredToggle";
 
 const PITCH_MAX_LENGTH = 140;
 
@@ -24,7 +26,7 @@ export function ManageEditForm({
   initialPitch: string;
   initialDestinationLink: string;
   initialLocation: string;
-  initialLicensedInsured: boolean;
+  initialLicensedInsured: boolean | null;
   initialYearsInBusiness: number | null;
   initialAvailability: Availability | null;
   initialSpecialtyTags: string;
@@ -33,6 +35,7 @@ export function ManageEditForm({
 }) {
   const router = useRouter();
   const [pitch, setPitch] = useState(initialPitch);
+  const [licensedInsured, setLicensedInsured] = useState(initialLicensedInsured);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -85,7 +88,7 @@ export function ManageEditForm({
       <div>
         <div className="flex items-center justify-between">
           <label htmlFor="pitch" className="block text-sm font-medium text-ink">
-            One-line pitch
+            One-line pitch <span className="font-normal text-slate">(optional)</span>
           </label>
           <span className="font-mono text-xs text-slate">
             {pitch.length}/{PITCH_MAX_LENGTH}
@@ -94,7 +97,6 @@ export function ManageEditForm({
         <input
           id="pitch"
           name="pitch"
-          required
           maxLength={PITCH_MAX_LENGTH}
           value={pitch}
           onChange={(e) => setPitch(e.target.value)}
@@ -103,27 +105,33 @@ export function ManageEditForm({
       </div>
 
       <div>
-        <label htmlFor="destinationLink" className="block text-sm font-medium text-ink">
-          Destination link
-        </label>
-        <input
-          id="destinationLink"
-          name="destinationLink"
-          type="url"
-          required
-          defaultValue={initialDestinationLink}
-          className="mt-1 w-full rounded-md border border-border px-3 py-2 text-ink outline-none focus:border-green"
-        />
+        <span className="block text-sm font-medium text-ink">Destination link</span>
+        {/* Deliberately not an editable field - see editListingViaToken's
+            comment for why: a listing's rank/clicks/reviews build up against
+            a specific destination, and letting that be swapped after the
+            fact would let a provider quietly turn an established listing
+            into an ad for a different site entirely. No `name` attribute
+            here on purpose, so even a tampered form submission can't smuggle
+            a new value through - the API ignores this field either way. */}
+        <p className="mt-1 truncate rounded-md border border-border bg-canvas px-3 py-2 text-slate">
+          {initialDestinationLink}
+        </p>
+        <p className="mt-1 text-xs text-slate">
+          Can&apos;t be changed here - email{" "}
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="underline hover:text-ink">
+            {SUPPORT_EMAIL}
+          </a>{" "}
+          if this needs to move.
+        </p>
       </div>
 
       <div>
         <label htmlFor="location" className="block text-sm font-medium text-ink">
-          Location
+          Location <span className="font-normal text-slate">(optional)</span>
         </label>
         <input
           id="location"
           name="location"
-          required
           maxLength={80}
           defaultValue={initialLocation}
           placeholder="City, State"
@@ -131,19 +139,7 @@ export function ManageEditForm({
         />
       </div>
 
-      <div>
-        <span className="block text-sm font-medium text-ink">Licensed &amp; insured?</span>
-        <div className="mt-1 flex gap-4">
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input type="radio" name="licensedInsured" value="yes" required defaultChecked={initialLicensedInsured} />
-            Yes
-          </label>
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input type="radio" name="licensedInsured" value="no" required defaultChecked={!initialLicensedInsured} />
-            No
-          </label>
-        </div>
-      </div>
+      <LicensedInsuredToggle value={licensedInsured} onChange={setLicensedInsured} />
 
       <div>
         <label htmlFor="logo" className="block text-sm font-medium text-ink">
