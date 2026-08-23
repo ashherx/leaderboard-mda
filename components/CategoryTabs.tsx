@@ -18,7 +18,11 @@ export function CategoryTabs({
 }) {
   return (
     <nav className="-mx-4 overflow-x-auto border-b border-border px-4">
-      <div className="flex w-max gap-5">
+      {/* w-max + min-w-full: centers the row when it's narrower than the nav
+          (nothing to scroll), but once it's wider than min-w-full, w-max
+          takes over and the row scrolls left-anchored like normal - centering
+          only ever applies to the case with actual free space. */}
+      <div className="flex w-max min-w-full justify-center gap-5">
         {categories.map((category) => {
           const isCurrent = category.slug === selectedSlug;
           return (

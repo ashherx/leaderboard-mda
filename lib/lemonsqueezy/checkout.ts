@@ -1,5 +1,35 @@
 import { createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 import { ensureLemonSqueezyConfigured } from "@/lib/lemonsqueezy/server";
+import { SUPPORT_EMAIL } from "@/lib/site";
+
+// Appended to every checkout's description (productOptions.description is
+// the only free-text field Lemon Squeezy's checkout API exposes pre-payment
+// - there's no separate "terms" field) so a buyer sees the rules and
+// chargeback notice on the checkout page itself, not just on /rules.
+// Lemon Squeezy renders this field as HTML, not plain text - a "\n" gets
+// collapsed like any other whitespace, so actual markup is required for line
+// breaks/lists to survive onto the checkout page.
+const CHECKOUT_RULES_HTML = `<p><strong>Rules</strong><br>Podium is a public leaderboard. You pay to stand above everyone else. Rank is the bid - nothing else.</p>
+<p><strong>How ranking works</strong></p>
+<ul>
+<li>Bids are whole US dollars.</li>
+<li>Paying less than #1 still puts you on the board at whatever rank that bid can take.</li>
+<li>You only pay the difference from the current bid. Someone else cannot take your rank by paying that difference.</li>
+</ul>
+<p><strong>After you pay</strong></p>
+<ul>
+<li>Your listing is public. Clicks go to the URL or profile you submitted, without query parameters.</li>
+<li>A completed payment is what claims the rank.</li>
+</ul>
+<p><strong>Payment &amp; Chargebacks</strong></p>
+<ul>
+<li>By completing this purchase, you confirm that you have reviewed the product and pricing and authorize the payment. If you have any issue with your purchase, please contact us at ${SUPPORT_EMAIL} before initiating a payment dispute or chargeback.</li>
+<li>Nothing in this policy limits any rights that cannot legally be excluded.</li>
+</ul>`;
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
 /**
  * Every bid is a different whole-dollar amount, so there's no fixed catalog
@@ -35,7 +65,7 @@ export async function createBidCheckout(params: {
     customPrice: params.chargeAmountCents,
     productOptions: {
       name: params.name,
-      description: params.description,
+      description: `<p>${escapeHtml(params.description)}</p>\n${CHECKOUT_RULES_HTML}`,
       redirectUrl: params.redirectUrl,
     },
     checkoutData: {

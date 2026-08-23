@@ -18,9 +18,9 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     <div className="min-h-screen bg-canvas text-ink">
       <header className="border-b border-border bg-white">
         <div className="mx-auto flex max-w-360 items-center justify-between px-6 py-3">
-          <nav className="flex items-center gap-5">
+          <nav className="flex items-center gap-10">
             <Link href="/admin" className="font-display text-base font-bold text-ink">
-              The Podium <span className="font-sans text-sm font-normal text-slate">Admin</span>
+              The Podium Admin Panel 
             </Link>
             <div className="flex items-center gap-4 text-sm text-slate">
               {NAV_LINKS.map((link) => (

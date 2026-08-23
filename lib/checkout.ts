@@ -117,9 +117,11 @@ export type SubmitListingResult =
 /**
  * Creates a new listing in pending_payment status and opens a Lemon Squeezy
  * checkout for it - unless the destination URL already belongs to another
- * active listing (any category), in which case this becomes a top-up
+ * *published* listing (any category), in which case this becomes a top-up
  * checkout against *that* listing instead of a second row for the same
- * business. That listing's content/manage-token are untouched either way;
+ * business. A listing still stuck in pending_payment for the same URL never
+ * went live, so it doesn't count here and this submission is free to proceed
+ * as a normal new listing. That listing's content/manage-token are untouched either way;
  * the submitter here doesn't get a manage link for it (see
  * startLemonSqueezyCheckout's manageToken param and app/success/page.tsx).
  * Either way, nothing goes live until Lemon Squeezy's webhook confirms payment.
@@ -181,7 +183,7 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
     listing.id,
     bidAmountCents,
     bidAmountCents,
-    `${category.name} listing - ${content.providerName}`,
+    `The Podium Rank`,
     `New listing bid: ${content.providerName} in ${category.name}`,
     rawManageToken
   );

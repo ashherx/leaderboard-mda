@@ -104,7 +104,7 @@ export function ClaimPanel({
         price still puts you on the board at whatever rank that bid can take.
       </p>
 
-      <div className="mx-auto mt-5 flex max-w-2xl flex-col gap-2 sm:flex-row">
+      <div className="mt-5 flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
           value={link}
@@ -112,7 +112,7 @@ export function ClaimPanel({
           placeholder="Your site or portfolio link"
           className="flex-1 rounded-md border border-border bg-white px-4 py-2.5 text-ink outline-none focus:border-green"
         />
-        <CategoryDropdown categories={categories} selectedSlug={selectedSlug} onSelect={onSelectCategory} className="sm:w-72" />
+        <CategoryDropdown categories={categories} selectedSlug={selectedSlug} onSelect={onSelectCategory} className="sm:w-48" />
         {/* flex + items-center + leading-none, not text-align/line-height:
             Bricolage Grotesque's line box reserves more space below the
             glyphs than above, so centering via line-height alone left the

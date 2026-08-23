@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminCategoriesPage() {
   const categories = await listAllCategoriesForAdmin();
+  const nextDisplayOrder = Math.max(0, ...categories.map((c) => c.display_order)) + 1;
 
   return (
     <div>
@@ -92,6 +93,15 @@ export default async function AdminCategoriesPage() {
             type="number"
             min={1}
             defaultValue={5}
+            className="mt-1 w-20 rounded-md border border-border px-2 py-1 outline-none focus:border-gold"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-slate">Order</label>
+          <input
+            name="displayOrder"
+            type="number"
+            defaultValue={nextDisplayOrder}
             className="mt-1 w-20 rounded-md border border-border px-2 py-1 outline-none focus:border-gold"
           />
         </div>

@@ -48,8 +48,16 @@ export async function createCategoryAction(formData: FormData) {
   const minBidDollars = Number(formData.get("minBidDollars"));
   if (!name || !Number.isFinite(minBidDollars) || minBidDollars <= 0) return;
 
-  await createCategory(name, Math.round(minBidDollars) * 100);
+  const displayOrderRaw = formData.get("displayOrder");
+  const displayOrder = displayOrderRaw ? Number(displayOrderRaw) : undefined;
+
+  await createCategory(
+    name,
+    Math.round(minBidDollars) * 100,
+    displayOrder !== undefined && Number.isFinite(displayOrder) ? displayOrder : undefined
+  );
   revalidatePath("/admin/categories");
+  revalidatePath("/"); // display order affects the public category tabs too
 }
 
 export async function updateCategoryAction(formData: FormData) {

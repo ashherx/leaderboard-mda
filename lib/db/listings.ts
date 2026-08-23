@@ -251,11 +251,14 @@ export async function getListingById(listingId: string): Promise<Listing | null>
 }
 
 /**
- * Finds an existing, still-active (pending payment or live) listing for the
- * same destination URL, anywhere in the site - used to fold a duplicate
- * submission into a top-up of the existing listing instead of creating a
- * second row for it (see submitListingAndCheckout). An unpublished listing's
- * URL is free to reclaim, so that status is deliberately excluded.
+ * Finds an existing, live (published) listing for the same destination URL,
+ * anywhere in the site - used to fold a duplicate submission into a top-up
+ * of the existing listing instead of creating a second row for it (see
+ * submitListingAndCheckout). Listings still stuck in pending_payment (an
+ * abandoned/incomplete checkout) never went live, so they're deliberately
+ * excluded - otherwise the URL would be unreclaimable and every future
+ * submitter would get told it's "already listed" for a listing nobody can
+ * ever see.
  */
 export async function findActiveListingByDestinationLinkKey(key: string): Promise<Listing | null> {
   const supabase = getSupabaseServerClient();
@@ -263,7 +266,7 @@ export async function findActiveListingByDestinationLinkKey(key: string): Promis
     .from("listings")
     .select("*")
     .eq("destination_link_key", key)
-    .in("status", ["pending_payment", "published"])
+    .eq("status", "published")
     .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();

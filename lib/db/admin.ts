@@ -157,16 +157,21 @@ function slugify(name: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export async function createCategory(name: string, minBidCents: number): Promise<Category> {
+/** displayOrder, if given, is used as-is (lets an admin place a new category precisely) - otherwise defaults to after everything else, same as before. */
+export async function createCategory(name: string, minBidCents: number, displayOrder?: number): Promise<Category> {
   const supabase = getSupabaseServerClient();
 
-  const { data: existing, error: maxErr } = await supabase
-    .from("categories")
-    .select("display_order")
-    .order("display_order", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (maxErr) throw maxErr;
+  let order = displayOrder;
+  if (order === undefined) {
+    const { data: existing, error: maxErr } = await supabase
+      .from("categories")
+      .select("display_order")
+      .order("display_order", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (maxErr) throw maxErr;
+    order = (existing?.display_order ?? 0) + 10;
+  }
 
   const { data, error } = await supabase
     .from("categories")
@@ -174,7 +179,7 @@ export async function createCategory(name: string, minBidCents: number): Promise
       name,
       slug: slugify(name),
       min_bid_cents: minBidCents,
-      display_order: (existing?.display_order ?? 0) + 10,
+      display_order: order,
     })
     .select("*")
     .single();
