@@ -13,17 +13,19 @@ re-bid flow - all verified against the real Supabase database with live
 end-to-end tests (submit → outbid → correct final rank → edit content →
 re-bid to reclaim a rank → cleanup).
 
-**Payments run through Paddle**, in sandbox/test mode for now. Submitting the
-form (initial or re-bid) creates the listing/payment in `pending`, opens a
-Paddle Checkout overlay for the bid amount (`lib/checkout.ts` →
-`startPaddleCheckout`, `lib/paddle/checkout.ts`), and only takes the listing
-live once Paddle's webhook confirms the transaction completed
-(`app/api/webhooks/paddle/route.ts` → `completePaddlePayment`). The success
-page polls briefly (`components/PendingPaymentNotice.tsx`) to cover the gap
-between the checkout redirect and the webhook landing. Flipping
-`NEXT_PUBLIC_PADDLE_ENV` from `sandbox` to `production` (plus live keys) is
-the only change needed to go live - see `.env.local.example` for the required
-Paddle vars and where to find them in the dashboard.
+**Payments run through Lemon Squeezy**, in test mode for now (switched from
+Paddle after Paddle's Acceptable Use Policy rejected this domain for the
+IT/human-services category the listings fall under). Submitting the form
+(initial or re-bid) creates the listing/payment in `pending`, opens a Lemon
+Squeezy Checkout overlay for the bid amount (`lib/checkout.ts` →
+`startLemonSqueezyCheckout`, `lib/lemonsqueezy/checkout.ts`), and only takes
+the listing live once Lemon Squeezy's webhook confirms the order was paid
+(`app/api/webhooks/lemonsqueezy/route.ts` → `completeLemonSqueezyPayment`).
+The success page polls briefly (`components/PendingPaymentNotice.tsx`) to
+cover the gap between the checkout redirect and the webhook landing. Turning
+off "Test mode" on the store (plus live keys) is the only change needed to
+go live - see `.env.local.example` for the required Lemon Squeezy vars and
+where to find them in the dashboard.
 
 **Found and fixed during Prompt 4 testing**: Next.js patches the global
 `fetch()` to cache by default, including inside third-party libraries like
@@ -207,21 +209,21 @@ components/ClaimPanel.tsx            "Claim #1 for $X" + custom-bid rank preview
 components/Pagination.tsx            Prev/next page links
 components/ListingSubmissionForm.tsx Submission form (client component) - posts to /api/listings
 
-lib/checkout.ts         submitListingAndCheckout / rebidListingViaToken - validation + opening a Paddle checkout (see Status above)
-lib/paddle/server.ts    Server-side Paddle SDK client (sandbox/production picked by NEXT_PUBLIC_PADDLE_ENV)
-lib/paddle/checkout.ts  createBidTransaction - one-off ("non-catalog") Paddle price per bid amount
-lib/paddle/client.ts    Browser-side Paddle.js init, memoized (used by the submission + re-bid forms)
+lib/checkout.ts              submitListingAndCheckout / rebidListingViaToken - validation + opening a Lemon Squeezy checkout (see Status above)
+lib/lemonsqueezy/server.ts   Server-side Lemon Squeezy SDK config (test/live picked by the store's own test-mode toggle)
+lib/lemonsqueezy/checkout.ts createBidCheckout - one-off (customPrice) Lemon Squeezy price per bid amount
+components/LemonSqueezyScript.tsx  Loads Lemon.js once app-wide (used by the submission + re-bid forms to open the overlay)
 lib/link-policy.ts      Rejects chat/invite links (Discord/Telegram/WhatsApp/Messenger) as a destination
 lib/storage.ts          Logo upload to the `listing-logos` Supabase Storage bucket
 
-app/categories/[slug]/claim/page.tsx     Submission form page
+app/claim/page.tsx                       Submission form page (?category=slug)
 app/success/page.tsx                     Post-checkout success page (rank + manage link); shows PendingPaymentNotice until the webhook publishes the listing
 app/manage/[token]/page.tsx              Manage-link page - edit content, re-bid to reclaim a rank
-app/api/listings/route.ts                Handles new-listing submission (multipart: fields + optional logo file), returns a Paddle transaction id
+app/api/listings/route.ts                Handles new-listing submission (multipart: fields + optional logo file), returns a Lemon Squeezy checkout URL
 app/api/manage/[token]/edit/route.ts     Content edit (no payment)
-app/api/manage/[token]/rebid/route.ts    Re-bid - same Paddle-checkout seam as initial submission
+app/api/manage/[token]/rebid/route.ts    Re-bid - same Lemon Squeezy checkout seam as initial submission
 app/api/manage/[token]/status/route.ts   Polled by PendingPaymentNotice while waiting on the webhook
-app/api/webhooks/paddle/route.ts         Verifies Paddle's signature, publishes the listing on transaction.completed
+app/api/webhooks/lemonsqueezy/route.ts   Verifies Lemon Squeezy's signature, publishes the listing on order_created (status "paid")
 
 components/ManageEditForm.tsx  Edit-content form on the manage page
 components/ManageRebidForm.tsx Re-bid form on the manage page, shows the new rank on success

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getPaddleInstance } from "@/lib/paddle/client";
 import { PaymentDisclaimer } from "@/components/PaymentDisclaimer";
 
 const PITCH_MAX_LENGTH = 140;
@@ -95,22 +94,17 @@ export function ListingSubmissionForm({
         return;
       }
 
-      const paddle = await getPaddleInstance();
-      if (!paddle) {
-        setError("Payments aren't configured yet - contact the site owner.");
-        setSubmitting(false);
-        return;
+      // Lemon Squeezy redirects the browser to the success page itself once
+      // the checkout completes (redirectUrl was set server-side when the
+      // checkout was created) - the listing goes live from the webhook that
+      // fires around the same time (see PendingPaymentNotice). Prefer the
+      // Lemon.js overlay; fall back to a full-page redirect if the script
+      // hasn't finished loading yet, so a slow script load never blocks checkout.
+      if (typeof window.LemonSqueezy?.Url?.Open === "function") {
+        window.LemonSqueezy.Url.Open(data.checkoutUrl);
+      } else {
+        window.location.href = data.checkoutUrl;
       }
-
-      // Paddle redirects the browser to the success page itself once the
-      // checkout completes - the listing goes live from the webhook that
-      // fires around the same time (see PendingPaymentNotice).
-      paddle.Checkout.open({
-        transactionId: data.transactionId,
-        settings: {
-          successUrl: `${window.location.origin}/success?token=${data.manageToken}&txn=${encodeURIComponent(data.transactionId)}`,
-        },
-      });
       setSubmitting(false);
     } catch {
       setError("Network error - try again.");

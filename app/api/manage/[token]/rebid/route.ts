@@ -10,5 +10,5 @@ export async function POST(request: Request, { params }: { params: { token: stri
   if (!result.ok) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
   }
-  return NextResponse.json({ ok: true, transactionId: result.transactionId });
+  return NextResponse.json({ ok: true, checkoutUrl: result.checkoutUrl, paymentId: result.paymentId });
 }

@@ -37,11 +37,12 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-ink">Payments and Paddle</h2>
+            <h2 className="font-display text-lg font-semibold text-ink">Payments and Lemon Squeezy</h2>
             <p className="mt-2 text-slate">
-              Payments are processed by our reseller, Paddle.com Market Limited, which acts as the Merchant of
-              Record for all purchases made on this site. Paddle handles billing, applicable taxes, and payment
-              disputes. Your payment card statement will show a charge from Paddle, not from {SITE_NAME} directly.
+              Payments are processed by our reseller, Sold Through Link, LLC (operating as Lemon Squeezy), which
+              acts as the Merchant of Record for all purchases made on this site. Lemon Squeezy handles billing,
+              applicable taxes, and payment disputes. Your payment card statement will show a charge from Lemon
+              Squeezy, not from {SITE_NAME} directly.
             </p>
             <p className="mt-2 text-slate">
               A completed payment claims your listing&apos;s rank immediately, at whatever position your bid amount

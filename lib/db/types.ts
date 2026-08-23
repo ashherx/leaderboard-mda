@@ -4,7 +4,7 @@
 
 export type ListingStatus = "pending_payment" | "published" | "unpublished";
 export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
-export type PaymentProvider = "paddle" | "manual";
+export type PaymentProvider = "lemonsqueezy" | "manual";
 export type ReportStatus = "open" | "reviewed" | "dismissed";
 
 // These are `type`, not `interface`, on purpose: the Database.Tables/Views
@@ -30,6 +30,8 @@ export type Listing = {
   provider_name: string;
   pitch: string;
   destination_link: string;
+  /** Normalized copy of destination_link for duplicate-URL lookup - see lib/link-policy.ts's normalizeUrlKey. */
+  destination_link_key: string | null;
   logo_url: string | null;
   bid_amount_cents: number;
   status: ListingStatus;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Inter, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { LemonSqueezyScript } from "@/components/LemonSqueezyScript";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -59,6 +60,7 @@ export default function RootLayout({
       <body className={`${bricolage.variable} ${inter.variable} ${plexMono.variable} antialiased`}>
         {children}
         <Analytics />
+        <LemonSqueezyScript />
       </body>
     </html>
   );

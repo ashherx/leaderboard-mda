@@ -40,3 +40,17 @@ export function validateDestinationLink(rawUrl: string): { ok: true; url: string
 
   return { ok: true, url: parsed.toString() };
 }
+
+/**
+ * Normalizes a destination URL for duplicate detection - not for display or
+ * storage of the link itself (that stays exactly what the provider entered).
+ * Lowercases the host, drops a leading "www.", and ignores trailing
+ * slash/querystring/fragment, so "example.com", "www.example.com/", and
+ * "https://example.com?ref=x" are all treated as the same listing.
+ */
+export function normalizeUrlKey(url: string): string {
+  const parsed = new URL(url);
+  const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+  const path = parsed.pathname.replace(/\/+$/, "");
+  return `${host}${path}`.toLowerCase();
+}

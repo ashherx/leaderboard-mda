@@ -35,9 +35,9 @@ export default function PrivacyPage() {
                 one-line pitch, your destination link, and an optional logo. This is published on the leaderboard.
               </li>
               <li>
-                <strong className="text-ink">Payment information</strong> - handled entirely by Paddle, our
-                payment processor and Merchant of Record. We never see or store your card details; we receive a
-                transaction ID, amount, and payment status from Paddle to activate your listing.
+                <strong className="text-ink">Payment information</strong> - handled entirely by Lemon Squeezy, our
+                payment processor and Merchant of Record. We never see or store your card details; we receive an
+                order ID, amount, and payment status from Lemon Squeezy to activate your listing.
               </li>
               <li>
                 <strong className="text-ink">An anonymous visit cookie</strong> - a random ID (no personal
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-display text-lg font-semibold text-ink">Who we share it with</h2>
             <p className="mt-2 text-slate">
-              Service providers we use to run {SITE_NAME}: Paddle (payment processing), Supabase (database
+              Service providers we use to run {SITE_NAME}: Lemon Squeezy (payment processing), Supabase (database
               hosting), and Vercel (site hosting and analytics). Each processes data on our behalf under their own
               privacy and security terms; we don&apos;t sell data to anyone else.
             </p>

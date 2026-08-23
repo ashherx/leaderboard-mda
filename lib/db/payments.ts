@@ -86,6 +86,20 @@ export async function getPaymentByProviderPaymentId(providerPaymentId: string): 
   return data;
 }
 
+/**
+ * Looks up one payment by our own id - used by the success page to check
+ * whether *this specific* checkout has been confirmed yet. Lemon Squeezy
+ * (unlike Paddle) has no id for a checkout that carries through to its
+ * resulting order, so unlike getPaymentByProviderPaymentId this is keyed on
+ * a value we generate upfront, before the payment ever completes.
+ */
+export async function getPaymentById(paymentId: string): Promise<Payment | null> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase.from("payments").select("*").eq("id", paymentId).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 /** Every payment ever attempted against a listing - initial claim, re-bids, failures - newest first. Shown on the manage page as an audit trail. */
 export async function listPaymentsForListing(listingId: string): Promise<Payment[]> {
   const supabase = getSupabaseServerClient();

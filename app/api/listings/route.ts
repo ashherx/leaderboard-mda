@@ -44,7 +44,8 @@ export async function POST(request: Request) {
     ok: true,
     listingId: result.listingId,
     manageToken: result.rawManageToken,
-    transactionId: result.transactionId,
+    checkoutUrl: result.checkoutUrl,
+    paymentId: result.paymentId,
     categorySlug: result.categorySlug,
   });
 }

@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { encryptManageToken, generateManageToken, hashManageToken } from "@/lib/manage-token";
+import { normalizeUrlKey } from "@/lib/link-policy";
 import type { CategoryPricing, Listing, ListingWithRank } from "@/lib/db/types";
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -132,6 +133,7 @@ export async function createPendingListing(
       provider_name: input.providerName,
       pitch: input.pitch,
       destination_link: input.destinationLink,
+      destination_link_key: normalizeUrlKey(input.destinationLink),
       logo_url: input.logoUrl ?? null,
       bid_amount_cents: input.bidAmountCents,
       status: "pending_payment",
@@ -187,6 +189,7 @@ export async function updateListingContent(listingId: string, update: ListingCon
       provider_name: update.providerName,
       pitch: update.pitch,
       destination_link: update.destinationLink,
+      destination_link_key: normalizeUrlKey(update.destinationLink),
       ...(update.logoUrl !== undefined ? { logo_url: update.logoUrl } : {}),
     })
     .eq("id", listingId)
@@ -242,6 +245,28 @@ export async function getPublishedListingById(listingId: string): Promise<Listin
 export async function getListingById(listingId: string): Promise<Listing | null> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.from("listings").select("*").eq("id", listingId).maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Finds an existing, still-active (pending payment or live) listing for the
+ * same destination URL, anywhere in the site - used to fold a duplicate
+ * submission into a top-up of the existing listing instead of creating a
+ * second row for it (see submitListingAndCheckout). An unpublished listing's
+ * URL is free to reclaim, so that status is deliberately excluded.
+ */
+export async function findActiveListingByDestinationLinkKey(key: string): Promise<Listing | null> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("destination_link_key", key)
+    .in("status", ["pending_payment", "published"])
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
 
   if (error) throw error;
   return data;

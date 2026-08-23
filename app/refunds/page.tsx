@@ -63,10 +63,11 @@ export default function RefundsPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-ink">Paddle as Merchant of Record</h2>
+            <h2 className="font-display text-lg font-semibold text-ink">Lemon Squeezy as Merchant of Record</h2>
             <p className="mt-2 text-slate">
-              All payments are processed by Paddle.com Market Limited, acting as Merchant of Record. Approved
-              refunds are issued back to your original payment method via Paddle.
+              All payments are processed by Sold Through Link, LLC (operating as Lemon Squeezy), acting as
+              Merchant of Record. Approved refunds are issued back to your original payment method via Lemon
+              Squeezy.
             </p>
           </section>
         </div>
