@@ -23,17 +23,20 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
   if (categories.length === 0) return {};
 
   if (searchParams.category === ALL_CATEGORIES_SLUG) {
-    const title = `${ALL_CATEGORIES_NAME} Leaderboard`;
+    const title = `The Podium`;
     const description = "Every category, combined - each listing still ranked purely by bid within its own category.";
     return {
-      title,
+      // Spelled out in full (not left to the root layout's title.template)
+      // so the browser tab reliably reads "... - The Podium" rather than
+      // just the bare category title.
+      title: `The Podium`,
       description,
       alternates: { canonical: `/?category=${ALL_CATEGORIES_SLUG}` },
       // No openGraph.url here - see the <meta property="og:url"> rendered
       // directly in HomePage's JSX below for why.
       openGraph: {
         ...OPEN_GRAPH_SITE_DEFAULTS,
-        title: `${title} - The Podium`,
+        title: `${title} - Ranked purely by who's paid the most`,
         description,
         // No per-category dynamic image makes sense for a merged "All" view
         // (there's no single category to headline) - the static site image
@@ -46,14 +49,15 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
   const requested = searchParams.category ? await getCategoryBySlug(searchParams.category) : null;
   const category = requested ?? categories[0];
 
-  const title = `${category.name} Leaderboard`;
+  const title = `The Podium`;
   const description = category.description ?? `See who's ranked #1 in ${category.name}, ranked purely by bid.`;
-  // openGraph.title doesn't inherit the root layout's title template (that
-  // only applies to the <title> tag), so the "- The Podium" suffix is
-  // spelled out here manually to keep share previews branded. The image is
-  // a manual route (not the opengraph-image.tsx file convention) because
-  // that convention only varies by route params, not query strings, and
-  // category selection lives in ?category= now that browsing is unified.
+  // Both the <title> tag and openGraph.title are spelled out in full here
+  // (rather than left to the root layout's title.template) so the browser
+  // tab and share previews both reliably read "... - The Podium" instead of
+  // just the bare category title. The image is a manual route (not the
+  // opengraph-image.tsx file convention) because that convention only
+  // varies by route params, not query strings, and category selection
+  // lives in ?category= now that browsing is unified.
   //
   // alternates.canonical: every category is its own real, distinct page as
   // far as SEO/AI-crawling is concerned (see app/sitemap.ts) even though
@@ -61,7 +65,7 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
   // (rather than defaulting to bare "/") so it isn't read as a duplicate of
   // the default category's page.
   return {
-    title,
+    title: `${title} - Ranked purely by who's paid the mos`,
     description,
     alternates: { canonical: `/?category=${category.slug}` },
     // No openGraph.url here either - same reason as the "All" branch above.

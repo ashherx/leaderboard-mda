@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     url: "/",
     title: SITE_NAME,
     description: DESCRIPTION,
-    images: [{ ...OG_IMAGE, alt: SITE_NAME }],
+    images: [{ url: OG_IMAGE.url, alt: SITE_NAME }],
   },
   // Discord and Slack both also check twitter:card - without it they fall
   // back to a small thumbnail instead of the large image treatment even
