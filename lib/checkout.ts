@@ -3,6 +3,7 @@ import {
   createPendingListing,
   findActiveListingByDestinationLinkKey,
   getListingByManageToken,
+  getListingById,
   getListingRank,
   publishListing,
   updateListingContent,
@@ -11,6 +12,7 @@ import { createPendingPayment, markPaymentCompletedById } from "@/lib/db/payment
 import { normalizeUrlKey, validateDestinationLink } from "@/lib/link-policy";
 import { createBidCheckout } from "@/lib/lemonsqueezy/checkout";
 import { getRequestOrigin } from "@/lib/request-origin";
+import { sendAdminNotification } from "@/lib/email";
 import type { Availability } from "@/lib/db/types";
 
 const AVAILABILITY_VALUES: Availability[] = ["standard_hours", "same_day", "24_7"];
@@ -173,7 +175,33 @@ export async function completeLemonSqueezyPayment(
   } catch {
     return; // Unknown/already-processed payment id - ignore (e.g. a webhook retry).
   }
-  await publishListing(payment.listing_id, targetBidAmountCents);
+
+  // claimed_at is only ever set once, on first publish - read it *before*
+  // publishListing sets it, so the notification below can tell a brand-new
+  // claim apart from a re-bid on an already-live listing.
+  const beforePublish = await getListingById(payment.listing_id);
+  const isNewClaim = !beforePublish?.claimed_at;
+
+  const listing = await publishListing(payment.listing_id, targetBidAmountCents);
+
+  // Fire-and-forget - a broken mail config should never fail the webhook
+  // (Lemon Squeezy retries on non-2xx, and the listing is already live).
+  const category = await getCategoryById(listing.category_id);
+  void sendAdminNotification(
+    isNewClaim
+      ? `New listing claimed: ${listing.provider_name}`
+      : `Re-bid paid: ${listing.provider_name}`,
+    [
+      isNewClaim ? "A new listing was just claimed and published." : "A re-bid was just paid.",
+      "",
+      `Provider: ${listing.provider_name}`,
+      `Category: ${category?.name ?? listing.category_id}`,
+      `Bid: $${(targetBidAmountCents / 100).toFixed(2)}`,
+      `Charged: $${(payment.amount_cents / 100).toFixed(2)}`,
+      `Destination: ${listing.destination_link}`,
+      `Listing id: ${listing.id}`,
+    ].join("\n")
+  );
 }
 
 export interface SubmitListingInput extends ListingContentInput {
