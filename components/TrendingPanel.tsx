@@ -14,7 +14,11 @@ export function TrendingPanel({ trending }: { trending: TrendingListing[] }) {
         <ul className="mt-1 divide-y divide-border">
           {trending.map((item) => (
             <li key={item.listingId}>
-              <a href={`/r/${item.listingId}`} className="flex items-center gap-2 py-1.5 text-xs hover:bg-canvas">
+              <a
+                href={`/r/${item.listingId}`}
+                rel="sponsored ugc nofollow noopener noreferrer"
+                className="flex items-center gap-2 py-1.5 text-xs hover:bg-canvas"
+              >
                 {item.logoUrl ? (
                   // object-contain (not cover) + a padded canvas backing so a
                   // non-square logo doesn't get cropped at this small size.
@@ -22,6 +26,10 @@ export function TrendingPanel({ trending }: { trending: TrendingListing[] }) {
                   <img
                     src={item.logoUrl}
                     alt=""
+                    width={20}
+                    height={20}
+                    loading="lazy"
+                    decoding="async"
                     className="h-5 w-5 shrink-0 rounded bg-canvas object-contain p-0.5"
                   />
                 ) : (

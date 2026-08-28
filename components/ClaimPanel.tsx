@@ -105,7 +105,11 @@ export function ClaimPanel({
       </p>
 
       <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+        <label htmlFor="claim-destination-link" className="sr-only">
+          Your site or portfolio link
+        </label>
         <input
+          id="claim-destination-link"
           type="text"
           value={link}
           onChange={(e) => setLink(e.target.value)}

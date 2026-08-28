@@ -9,6 +9,7 @@ import { ManageRebidForm } from "@/components/ManageRebidForm";
 import { PaymentHistory } from "@/components/PaymentHistory";
 import { Footer } from "@/components/Footer";
 import { SiteHeader } from "@/components/SiteHeader";
+import { LemonSqueezyScript } from "@/components/LemonSqueezyScript";
 
 export const dynamic = "force-dynamic";
 
@@ -117,13 +118,14 @@ export default async function ManageListingPage({ params }: { params: { token: s
       <PaymentHistory payments={payments} />
 
       {category && (
-        <Link href={`/?category=${category.slug}`} className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline">
+        <Link href={`/categories/${category.slug}`} className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline">
           <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
           View the {category.name} leaderboard
         </Link>
       )}
     </main>
     <Footer />
+    <LemonSqueezyScript />
     </>
   );
 }

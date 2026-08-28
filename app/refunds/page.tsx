@@ -1,15 +1,16 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_NAME, SUPPORT_EMAIL } from "@/lib/site";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Refund Policy",
-  description: `How refunds work for ${SITE_NAME} purchases.`,
-};
+export const metadata = buildPageMetadata({
+  title: `Refund Policy | ${SITE_NAME}`,
+  description: `When sponsored ranking purchases on ${SITE_NAME} are final and the limited cases where a refund may be available.`,
+  path: "/refunds",
+});
 
 const LAST_UPDATED = "August 23, 2026";
 

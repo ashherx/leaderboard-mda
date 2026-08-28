@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { getCategoryBySlug } from "@/lib/db/categories";
@@ -7,8 +8,16 @@ import { ListingSubmissionForm } from "@/components/ListingSubmissionForm";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
+import { LemonSqueezyScript } from "@/components/LemonSqueezyScript";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: { absolute: "Claim a Sponsored Leaderboard Position | The Podium" },
+  description: "Submit your service provider listing and choose the paid bid that determines its leaderboard rank.",
+  robots: { index: false, follow: true },
+  referrer: "no-referrer",
+};
 
 export default async function ClaimPage({
   searchParams,
@@ -34,7 +43,7 @@ export default async function ClaimPage({
       <VisitTracker />
       <SiteHeader />
       <main className="mx-auto max-w-lg px-4 py-10">
-        <Link href={`/?category=${category.slug}`} className="inline-flex items-center gap-1 text-sm text-slate hover:text-green">
+        <Link href={`/categories/${category.slug}`} className="inline-flex items-center gap-1 text-sm text-slate hover:text-green">
           <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
           Back to {category.name}
         </Link>
@@ -54,6 +63,7 @@ export default async function ClaimPage({
         </div>
       </main>
       <Footer />
+      <LemonSqueezyScript />
     </>
   );
 }

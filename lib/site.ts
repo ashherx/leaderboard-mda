@@ -26,4 +26,4 @@ export const OPEN_GRAPH_SITE_DEFAULTS = {
  * large-image ratio (1200x630) - Facebook/LinkedIn/Discord render it at
  * full size instead of cropping or letterboxing.
  */
-export const OG_IMAGE = { url: "/og_image_3.png", width: 2064, height: 1080 };
+export const OG_IMAGE = { url: "/og-image.jpg", width: 1200, height: 630 };

@@ -37,6 +37,8 @@ export function ListingInfoPill({ listing }: { listing: ListingWithRank }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pinnedOpenRef = useRef(false);
+  const cardId = `provider-details-${listing.id}`;
 
   function clearCloseTimeout() {
     if (closeTimeoutRef.current) {
@@ -51,8 +53,15 @@ export function ListingInfoPill({ listing }: { listing: ListingWithRank }) {
   }
 
   function closeSoon() {
+    if (pinnedOpenRef.current) return;
     clearCloseTimeout();
     closeTimeoutRef.current = setTimeout(() => setOpen(false), CLOSE_DELAY_MS);
+  }
+
+  function closeNow() {
+    pinnedOpenRef.current = false;
+    clearCloseTimeout();
+    setOpen(false);
   }
 
   useEffect(() => {
@@ -66,22 +75,22 @@ export function ListingInfoPill({ listing }: { listing: ListingWithRank }) {
     }
     place();
 
-    function onPointerDown(e: MouseEvent) {
+    function onPointerDown(e: PointerEvent) {
       if (buttonRef.current?.contains(e.target as Node) || cardRef.current?.contains(e.target as Node)) return;
-      setOpen(false);
+      closeNow();
     }
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeNow();
     }
 
     window.addEventListener("scroll", place, true);
     window.addEventListener("resize", place);
-    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("scroll", place, true);
       window.removeEventListener("resize", place);
-      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
@@ -119,11 +128,18 @@ export function ListingInfoPill({ listing }: { listing: ListingWithRank }) {
           // refactor can't accidentally wire a click-through here.
           e.preventDefault();
           e.stopPropagation();
-          setOpen((v) => !v);
+          clearCloseTimeout();
+          const nextPinnedState = !pinnedOpenRef.current;
+          pinnedOpenRef.current = nextPinnedState;
+          setOpen(nextPinnedState);
         }}
         onMouseEnter={openNow}
         onMouseLeave={closeSoon}
+        onFocus={openNow}
+        onBlur={closeSoon}
         aria-expanded={open}
+        aria-controls={cardId}
+        aria-describedby={open ? cardId : undefined}
         aria-label="Provider details"
         className="absolute bottom-3 right-4 z-10 flex shrink-0 items-center gap-1 rounded-full border border-border bg-white px-2 py-0.5 text-[11px] font-medium text-slate shadow-sm transition-colors hover:border-gold hover:text-ink"
       >
@@ -135,7 +151,9 @@ export function ListingInfoPill({ listing }: { listing: ListingWithRank }) {
         position &&
         createPortal(
           <div
+            id={cardId}
             ref={cardRef}
+            role="tooltip"
             style={{ bottom: position.bottom, left: position.left, width: CARD_WIDTH }}
             className="fixed z-50 rounded-xl border border-border bg-white p-4 shadow-lg"
             onMouseEnter={openNow}
@@ -147,6 +165,10 @@ export function ListingInfoPill({ listing }: { listing: ListingWithRank }) {
                 <img
                   src={listing.logo_url}
                   alt=""
+                  width={48}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
                   className="h-12 w-12 shrink-0 rounded-full bg-canvas object-contain p-1.5"
                 />
               ) : (

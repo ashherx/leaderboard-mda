@@ -1,15 +1,16 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_NAME, SUPPORT_EMAIL } from "@/lib/site";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: `The terms that apply to using ${SITE_NAME}.`,
-};
+export const metadata = buildPageMetadata({
+  title: `Terms of Service | ${SITE_NAME}`,
+  description: `The terms that apply when using ${SITE_NAME} or purchasing a sponsored leaderboard rank.`,
+  path: "/terms",
+});
 
 const LAST_UPDATED = "August 23, 2026";
 

@@ -1,15 +1,16 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_NAME, SUPPORT_EMAIL } from "@/lib/site";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Notice",
-  description: `What ${SITE_NAME} collects, why, and who it's shared with.`,
-};
+export const metadata = buildPageMetadata({
+  title: `Privacy Notice | ${SITE_NAME}`,
+  description: `What ${SITE_NAME} collects, why it is collected, and which service providers process it.`,
+  path: "/privacy",
+});
 
 const LAST_UPDATED = "August 23, 2026";
 
