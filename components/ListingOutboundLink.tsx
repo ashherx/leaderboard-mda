@@ -27,7 +27,7 @@ export function ListingOutboundLink({
     <a
       href={`/r/${listingId}`}
       target="_blank"
-      rel="noopener noreferrer"
+      rel="sponsored ugc nofollow noopener noreferrer"
       className={className}
       onClick={(e) => {
         e.preventDefault();

@@ -70,6 +70,10 @@ export function ListingRow({
           <img
             src={listing.logo_url}
             alt=""
+            width={64}
+            height={64}
+            loading="lazy"
+            decoding="async"
             className="h-16 w-16 shrink-0 rounded-full border border-border bg-canvas object-contain p-2"
           />
         ) : (
@@ -89,6 +93,9 @@ export function ListingRow({
                 price out of alignment on narrow screens. */}
             <span className="min-w-0 flex-1 line-clamp-2 font-display text-base font-bold text-ink">
               {listing.provider_name}
+            </span>
+            <span className="shrink-0 rounded-full bg-gold/12 px-1.5 py-0.5 text-[10px] font-medium text-ink">
+              Sponsored
             </span>
             {listing.is_verified && (
               <span className="shrink-0 rounded-full bg-green/8 px-1.5 py-0.5 text-[10px] font-medium text-green">

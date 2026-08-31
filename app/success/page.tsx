@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { getListingByManageToken, getListingById, getListingRank } from "@/lib/db/listings";
@@ -11,6 +12,12 @@ import { PendingPaymentNotice } from "@/components/PendingPaymentNotice";
 import type { Listing, Payment } from "@/lib/db/types";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: { absolute: "Payment Status | The Podium" },
+  robots: { index: false, follow: false },
+  referrer: "no-referrer",
+};
 
 export default async function SuccessPage({ searchParams }: { searchParams: { token?: string; payment?: string } }) {
   const { token, payment: paymentId } = searchParams;
@@ -109,7 +116,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
       )}
 
       {category && (
-        <Link href={`/?category=${category.slug}`} className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline">
+        <Link href={`/categories/${category.slug}`} className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline">
           <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
           View the {category.name} leaderboard
         </Link>

@@ -1,6 +1,10 @@
 /** Shared site identity - used in payment disclaimers, the footer, and anywhere else a canonical name/contact is needed. */
 export const SITE_NAME = "The Podium";
 export const SUPPORT_EMAIL = "ashher@milliondollar.agency";
+export const SOCIAL_TITLE = "Outbid Competitors. Get Seen First. | The Podium";
+export const SOCIAL_DESCRIPTION =
+  "Market your business by bidding for the top spot in your service category. Higher bids rank higher, putting your link where visitors see it first.";
+export const SOCIAL_IMAGE_ALT = "The Podium helps businesses bid for top visibility in their service category";
 
 /**
  * Fields every page's `openGraph` object should carry, spread into each
@@ -26,4 +30,4 @@ export const OPEN_GRAPH_SITE_DEFAULTS = {
  * large-image ratio (1200x630) - Facebook/LinkedIn/Discord render it at
  * full size instead of cropping or letterboxing.
  */
-export const OG_IMAGE = { url: "/og_image_3.png", width: 2064, height: 1080 };
+export const OG_IMAGE = { url: "/og-image.jpg", width: 1200, height: 630 };

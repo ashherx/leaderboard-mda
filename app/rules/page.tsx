@@ -1,14 +1,15 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Rules",
-  description: "How ranking works, what's allowed, and what claims a spot.",
-};
+export const metadata = buildPageMetadata({
+  title: "Leaderboard Rules | The Podium",
+  description: "How sponsored ranking works, what providers may list, and what a paid bid claims on The Podium.",
+  path: "/rules",
+});
 
 export default function RulesPage() {
   return (

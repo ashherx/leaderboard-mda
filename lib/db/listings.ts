@@ -25,15 +25,24 @@ export async function listPublishedListingsForCategory(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, error, count } = await supabase
+  const { count, error: countError } = await supabase
     .from("listing_ranks")
-    .select("*", { count: "exact" })
+    .select("id", { count: "exact", head: true })
+    .eq("category_id", categoryId);
+
+  if (countError) throw countError;
+  const total = count ?? 0;
+  if (from >= total) return { listings: [], page, pageSize, total };
+
+  const { data, error } = await supabase
+    .from("listing_ranks")
+    .select("*")
     .eq("category_id", categoryId)
     .order("rank", { ascending: true })
     .range(from, to);
 
   if (error) throw error;
-  return { listings: data, page, pageSize, total: count ?? 0 };
+  return { listings: data, page, pageSize, total };
 }
 
 /**
@@ -52,16 +61,24 @@ export async function listPublishedListingsAcrossAllCategories(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, error, count } = await supabase
+  const { count, error: countError } = await supabase
     .from("listing_ranks")
-    .select("*", { count: "exact" })
+    .select("id", { count: "exact", head: true });
+
+  if (countError) throw countError;
+  const total = count ?? 0;
+  if (from >= total) return { listings: [], page, pageSize, total };
+
+  const { data, error } = await supabase
+    .from("listing_ranks")
+    .select("*")
     .order("bid_amount_cents", { ascending: false })
     .order("claimed_at", { ascending: true })
     .order("id", { ascending: true })
     .range(from, to);
 
   if (error) throw error;
-  return { listings: data, page, pageSize, total: count ?? 0 };
+  return { listings: data, page, pageSize, total };
 }
 
 /** What it costs right now to become #1, plus the category's floor price. */
