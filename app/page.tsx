@@ -11,6 +11,7 @@ import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
 import { StatsPill } from "@/components/StatsPill";
 import { LeaderboardBrowser } from "@/components/LeaderboardBrowser";
+import { SOCIAL_DESCRIPTION, SOCIAL_TITLE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,13 @@ export function generateMetadata({ searchParams }: { searchParams: SearchParams 
   const page = parsePageParam(searchParams.page);
   const validPage = page ?? 1;
   const title = validPage > 1 ? `${TITLE} - Page ${validPage}` : TITLE;
-  return buildPageMetadata({ title, description: DESCRIPTION, path: pagePath("/", validPage) });
+  return buildPageMetadata({
+    title,
+    description: DESCRIPTION,
+    path: pagePath("/", validPage),
+    socialTitle: SOCIAL_TITLE,
+    socialDescription: SOCIAL_DESCRIPTION,
+  });
 }
 
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {

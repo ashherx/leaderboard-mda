@@ -58,8 +58,22 @@ async function assertHostRedirect(path) {
 const home = await request("/");
 assert.equal(home.response.status, 200);
 assert.equal(title(home.body), "The Podium | Sponsored Service Provider Leaderboards");
+assert.equal(
+  meta(home.body, "name", "description"),
+  "Browse sponsored service provider leaderboards by category, or claim a position for your business. Rankings reflect paid bids, not reviews or endorsements.",
+);
 assert.equal(canonical(home.body), canonicalOrigin);
 assert.equal(meta(home.body, "property", "og:url"), canonicalOrigin);
+assert.equal(meta(home.body, "property", "og:title"), "Outbid Competitors. Get Seen First. | The Podium");
+assert.equal(
+  meta(home.body, "property", "og:description"),
+  "Market your business by bidding for the top spot in your service category. Higher bids rank higher, putting your link where visitors see it first.",
+);
+assert.equal(meta(home.body, "name", "twitter:title"), "Outbid Competitors. Get Seen First. | The Podium");
+assert.equal(
+  meta(home.body, "name", "twitter:description"),
+  "Market your business by bidding for the top spot in your service category. Higher bids rank higher, putting your link where visitors see it first.",
+);
 assert.equal(meta(home.body, "property", "og:image"), `${canonicalOrigin}/og-image.jpg`);
 assert.equal(meta(home.body, "property", "og:image:width"), "1200");
 assert.equal(meta(home.body, "property", "og:image:height"), "630");
@@ -94,6 +108,8 @@ assert.equal(category.response.status, 200);
 assert.equal(canonical(category.body), `${canonicalOrigin}${categoryPath}`);
 assert.equal(meta(category.body, "property", "og:url"), `${canonicalOrigin}${categoryPath}`);
 assert.match(title(category.body), /Service Providers Leaderboard \| The Podium$/);
+assert.match(meta(category.body, "property", "og:title"), /^Put Your .+ Business at the Top \| The Podium$/);
+assert.match(meta(category.body, "property", "og:description"), /^Market your .+ business by bidding for the top sponsored spot\./);
 assert.match(category.body, /<h1 class="sr-only">[^<]+ service provider leaderboard<\/h1>/);
 assert.match(category.body, /BreadcrumbList|CollectionPage/);
 assert.match(category.body, /href="\/categories\//);

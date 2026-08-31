@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Inter, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import { OG_IMAGE, OPEN_GRAPH_SITE_DEFAULTS, SITE_NAME } from "@/lib/site";
+import {
+  OG_IMAGE,
+  OPEN_GRAPH_SITE_DEFAULTS,
+  SITE_NAME,
+  SOCIAL_DESCRIPTION,
+  SOCIAL_IMAGE_ALT,
+  SOCIAL_TITLE,
+} from "@/lib/site";
 import { absoluteUrl, serializeJsonLd, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
@@ -36,15 +43,15 @@ export const metadata: Metadata = {
   openGraph: {
     ...OPEN_GRAPH_SITE_DEFAULTS,
     url: SITE_URL,
-    title: TITLE,
-    description: DESCRIPTION,
-    images: [{ ...OG_IMAGE, alt: `${SITE_NAME} sponsored service provider leaderboards` }],
+    title: SOCIAL_TITLE,
+    description: SOCIAL_DESCRIPTION,
+    images: [{ ...OG_IMAGE, alt: SOCIAL_IMAGE_ALT }],
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-    images: [{ ...OG_IMAGE, alt: `${SITE_NAME} sponsored service provider leaderboards` }],
+    title: SOCIAL_TITLE,
+    description: SOCIAL_DESCRIPTION,
+    images: [{ ...OG_IMAGE, alt: SOCIAL_IMAGE_ALT }],
   },
 };
 

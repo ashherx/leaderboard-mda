@@ -21,6 +21,14 @@ function categoryDescription(name: string): string {
   return `Compare sponsored ${name} service providers ranked by paid bid, or claim a position for your business. Rankings are not reviews, quality scores, or endorsements.`;
 }
 
+function categorySocialTitle(name: string): string {
+  return `Put Your ${name} Business at the Top | The Podium`;
+}
+
+function categorySocialDescription(name: string): string {
+  return `Market your ${name} business by bidding for the top sponsored spot. Outbid competitors and put your link where visitors see it first.`;
+}
+
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const category = await getCategoryBySlug(params.slug);
   if (!category) return { robots: { index: false, follow: false } };
@@ -31,6 +39,8 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     title: page > 1 ? `${baseTitle} - Page ${page}` : baseTitle,
     description: categoryDescription(category.name),
     path: pagePath(`/categories/${category.slug}`, page),
+    socialTitle: categorySocialTitle(category.name),
+    socialDescription: categorySocialDescription(category.name),
   });
 }
 

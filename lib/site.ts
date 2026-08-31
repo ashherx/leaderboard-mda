@@ -1,6 +1,10 @@
 /** Shared site identity - used in payment disclaimers, the footer, and anywhere else a canonical name/contact is needed. */
 export const SITE_NAME = "The Podium";
 export const SUPPORT_EMAIL = "ashher@milliondollar.agency";
+export const SOCIAL_TITLE = "Outbid Competitors. Get Seen First. | The Podium";
+export const SOCIAL_DESCRIPTION =
+  "Market your business by bidding for the top spot in your service category. Higher bids rank higher, putting your link where visitors see it first.";
+export const SOCIAL_IMAGE_ALT = "The Podium helps businesses bid for top visibility in their service category";
 
 /**
  * Fields every page's `openGraph` object should carry, spread into each

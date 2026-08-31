@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OG_IMAGE, OPEN_GRAPH_SITE_DEFAULTS, SITE_NAME } from "@/lib/site";
+import { OG_IMAGE, OPEN_GRAPH_SITE_DEFAULTS, SOCIAL_IMAGE_ALT } from "@/lib/site";
 import { resolveSiteUrl } from "@/site.config.mjs";
 
 export const SITE_URL = resolveSiteUrl();
@@ -12,10 +12,14 @@ export function buildPageMetadata({
   title,
   description,
   path,
+  socialTitle = title,
+  socialDescription = description,
 }: {
   title: string;
   description: string;
   path: string;
+  socialTitle?: string;
+  socialDescription?: string;
 }): Metadata {
   const url = absoluteUrl(path);
 
@@ -26,15 +30,15 @@ export function buildPageMetadata({
     openGraph: {
       ...OPEN_GRAPH_SITE_DEFAULTS,
       url,
-      title,
-      description,
-      images: [{ ...OG_IMAGE, alt: `${SITE_NAME} sponsored service provider leaderboards` }],
+      title: socialTitle,
+      description: socialDescription,
+      images: [{ ...OG_IMAGE, alt: SOCIAL_IMAGE_ALT }],
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
-      images: [{ ...OG_IMAGE, alt: `${SITE_NAME} sponsored service provider leaderboards` }],
+      title: socialTitle,
+      description: socialDescription,
+      images: [{ ...OG_IMAGE, alt: SOCIAL_IMAGE_ALT }],
     },
     robots: {
       index: true,
