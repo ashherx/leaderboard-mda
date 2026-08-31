@@ -28,7 +28,10 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     return NextResponse.redirect(new URL("/", _request.url));
   }
 
-  await Promise.all([incrementClickCount(listing.id), recordClickEvent(listing.id, listing.category_id)]);
+  await Promise.all([
+    incrementClickCount(listing.id),
+    recordClickEvent(listing.id, listing.category_id, listing.location_id),
+  ]);
 
   return NextResponse.redirect(withUtmSource(target.toString()), { status: 302 });
 }

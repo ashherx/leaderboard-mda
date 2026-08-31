@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
 import { getCategoryBySlug } from "@/lib/db/categories";
+import { getStateBySlug } from "@/lib/db/locations";
 import { previewRankForBid } from "@/lib/db/listings";
 
 /**
- * Powers the "try a lower bid" input on a category page: given a dollar
- * amount, returns the rank it would earn among *currently published*
- * listings right now. Read-only, no payment involved - the real rank at
- * publish time can differ if other bids land in between.
+ * Powers the "try a lower bid" input on a category+state board: given a
+ * dollar amount, returns the rank it would earn among *currently published*
+ * listings in this category, in this state, right now. Read-only, no
+ * payment involved - the real rank at publish time can differ if other bids
+ * land in between.
  */
-export async function GET(request: Request, { params }: { params: { slug: string } }) {
+export async function GET(request: Request, { params }: { params: { stateSlug: string; slug: string } }) {
+  const state = await getStateBySlug(params.stateSlug);
+  if (!state) {
+    return NextResponse.json({ error: "State not found" }, { status: 404 });
+  }
+
   const category = await getCategoryBySlug(params.slug);
   if (!category) {
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
@@ -29,6 +36,6 @@ export async function GET(request: Request, { params }: { params: { slug: string
     );
   }
 
-  const rank = await previewRankForBid(category.id, bidAmountCents);
+  const rank = await previewRankForBid(category.id, state.id, bidAmountCents);
   return NextResponse.json({ rank, bidAmountCents });
 }

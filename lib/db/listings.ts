@@ -13,12 +13,14 @@ export interface PaginatedListings {
 }
 
 /**
- * Published listings for a category, ranked by bid amount. Rank isn't stored
- * anywhere - it's read straight off the `listing_ranks` view, which computes
- * it on the fly via ROW_NUMBER() (see migration 0001 for why).
+ * Published listings for a category *within one location* (state, for now),
+ * ranked by bid amount. Rank isn't stored anywhere - it's read straight off
+ * the `listing_ranks` view, which computes it on the fly via ROW_NUMBER(),
+ * now partitioned by (category_id, location_id) - see migration 0017.
  */
 export async function listPublishedListingsForCategory(
   categoryId: string,
+  locationId: string,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE }: { page?: number; pageSize?: number } = {}
 ): Promise<PaginatedListings> {
   const supabase = getSupabaseServerClient();
@@ -29,6 +31,7 @@ export async function listPublishedListingsForCategory(
     .from("listing_ranks")
     .select("*", { count: "exact" })
     .eq("category_id", categoryId)
+    .eq("location_id", locationId)
     .order("rank", { ascending: true })
     .range(from, to);
 
@@ -37,15 +40,17 @@ export async function listPublishedListingsForCategory(
 }
 
 /**
- * Every published listing across every category, merged into one feed for
- * the "All" tab (see lib/all-categories.ts) - same sort as a single
- * category's board (bid_amount_cents desc, claimed_at asc, id asc), just
- * without the `category_id` filter. Each row keeps its own real
- * per-category `rank` from the view; nothing here computes a new
- * cross-category rank (see listing_ranks in migration 0001 for why that'd
- * be misleading).
+ * Every published listing across every category *within one location*,
+ * merged into one feed for the "All" tab (see lib/all-categories.ts) - same
+ * sort as a single category's board (bid_amount_cents desc, claimed_at asc,
+ * id asc), just without the `category_id` filter. Each row keeps its own
+ * real per-category `rank` from the view; nothing here computes a new
+ * cross-category rank (see listing_ranks in migration 0001/0017 for why
+ * that'd be misleading). Still scoped to one location - "All" merges
+ * categories, not states.
  */
 export async function listPublishedListingsAcrossAllCategories(
+  locationId: string,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE }: { page?: number; pageSize?: number } = {}
 ): Promise<PaginatedListings> {
   const supabase = getSupabaseServerClient();
@@ -55,6 +60,7 @@ export async function listPublishedListingsAcrossAllCategories(
   const { data, error, count } = await supabase
     .from("listing_ranks")
     .select("*", { count: "exact" })
+    .eq("location_id", locationId)
     .order("bid_amount_cents", { ascending: false })
     .order("claimed_at", { ascending: true })
     .order("id", { ascending: true })
@@ -64,14 +70,19 @@ export async function listPublishedListingsAcrossAllCategories(
   return { listings: data, page, pageSize, total: count ?? 0 };
 }
 
-/** What it costs right now to become #1, plus the category's floor price. */
-export async function getCategoryPricing(categoryId: string, minBidCents: number): Promise<CategoryPricing> {
+/** What it costs right now to become #1 in this category+location, plus the category's floor price. */
+export async function getCategoryPricing(
+  categoryId: string,
+  locationId: string,
+  minBidCents: number
+): Promise<CategoryPricing> {
   const supabase = getSupabaseServerClient();
 
   const { data: current, error: currentErr } = await supabase
     .from("listing_ranks")
     .select("bid_amount_cents")
     .eq("category_id", categoryId)
+    .eq("location_id", locationId)
     .eq("rank", 1)
     .maybeSingle();
 
@@ -91,13 +102,14 @@ export interface CategoryStats {
   totalRaisedCents: number;
 }
 
-/** Homepage/category-header social proof: how many listings, how much raised, in this category. */
-export async function getCategoryStats(categoryId: string): Promise<CategoryStats> {
+/** Homepage/category-header social proof: how many listings, how much raised, in this category+location. */
+export async function getCategoryStats(categoryId: string, locationId: string): Promise<CategoryStats> {
   const supabase = getSupabaseServerClient();
   const { data, error, count } = await supabase
     .from("listings")
     .select("bid_amount_cents", { count: "exact" })
     .eq("category_id", categoryId)
+    .eq("location_id", locationId)
     .eq("status", "published");
 
   if (error) throw error;
@@ -120,12 +132,13 @@ export async function getCategoryStats(categoryId: string): Promise<CategoryStat
  * submission at that amount (it was claimed first). Using `gt` here would
  * preview a rank one better than what publishing would actually produce.
  */
-export async function previewRankForBid(categoryId: string, bidAmountCents: number): Promise<number> {
+export async function previewRankForBid(categoryId: string, locationId: string, bidAmountCents: number): Promise<number> {
   const supabase = getSupabaseServerClient();
   const { count, error } = await supabase
     .from("listings")
     .select("id", { count: "exact", head: true })
     .eq("category_id", categoryId)
+    .eq("location_id", locationId)
     .eq("status", "published")
     .gte("bid_amount_cents", bidAmountCents);
 
@@ -135,6 +148,8 @@ export async function previewRankForBid(categoryId: string, bidAmountCents: numb
 
 export interface CreatePendingListingInput {
   categoryId: string;
+  /** The state (or, later, city) this listing's rank is scoped to - fixed at creation, like destinationLink, and only ever reassignable via admin (see updateListingDetails). */
+  locationId: string;
   providerName: string;
   pitch: string | null;
   destinationLink: string;
@@ -165,6 +180,7 @@ export async function createPendingListing(
     .from("listings")
     .insert({
       category_id: input.categoryId,
+      location_id: input.locationId,
       provider_name: input.providerName,
       pitch: input.pitch,
       destination_link: input.destinationLink,
@@ -307,21 +323,26 @@ export async function getListingById(listingId: string): Promise<Listing | null>
 }
 
 /**
- * Finds an existing, live (published) listing for the same destination URL,
- * anywhere in the site - used to fold a duplicate submission into a top-up
- * of the existing listing instead of creating a second row for it (see
- * submitListingAndCheckout). Listings still stuck in pending_payment (an
- * abandoned/incomplete checkout) never went live, so they're deliberately
- * excluded - otherwise the URL would be unreclaimable and every future
- * submitter would get told it's "already listed" for a listing nobody can
- * ever see.
+ * Finds an existing, live (published) listing for the same destination URL
+ * *in this state*, across any category - used to fold a duplicate
+ * submission into a top-up of the existing listing instead of creating a
+ * second row for it (see submitListingAndCheckout). Scoped to locationId:
+ * a business claiming the same URL in a different state is a genuinely
+ * separate board with its own liquidity (that's the whole point of
+ * per-state ranking - see migration 0017), so it gets its own listing there
+ * rather than topping up its Texas one. Listings still stuck in
+ * pending_payment (an abandoned/incomplete checkout) never went live, so
+ * they're deliberately excluded - otherwise the URL would be unreclaimable
+ * and every future submitter would get told it's "already listed" for a
+ * listing nobody can ever see.
  */
-export async function findActiveListingByDestinationLinkKey(key: string): Promise<Listing | null> {
+export async function findActiveListingByDestinationLinkKey(key: string, locationId: string): Promise<Listing | null> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
     .from("listings")
     .select("*")
     .eq("destination_link_key", key)
+    .eq("location_id", locationId)
     .eq("status", "published")
     .order("created_at", { ascending: true })
     .limit(1)

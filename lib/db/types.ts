@@ -7,6 +7,7 @@ export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
 export type PaymentProvider = "lemonsqueezy" | "manual";
 export type ReportStatus = "open" | "reviewed" | "dismissed";
 export type Availability = "standard_hours" | "same_day" | "24_7";
+export type LocationKind = "country" | "state" | "city";
 
 // These are `type`, not `interface`, on purpose: the Database.Tables/Views
 // entries below need to structurally satisfy supabase-js's
@@ -25,9 +26,28 @@ export type Category = {
   updated_at: string;
 };
 
+/**
+ * A row in the self-referencing `locations` table (country -> state ->
+ * city). `parent_id` is null only for a country. See migration 0016 for the
+ * kind/parent invariants enforced at the DB level.
+ */
+export type Location = {
+  id: string;
+  parent_id: string | null;
+  kind: LocationKind;
+  name: string;
+  slug: string;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Listing = {
   id: string;
   category_id: string;
+  /** The state (or, later, city) this listing's rank is scoped to - see migration 0017. Distinct from the free-text `location` display string below. */
+  location_id: string;
   provider_name: string;
   pitch: string | null;
   destination_link: string;
@@ -96,6 +116,7 @@ export type ClickEvent = {
   id: string;
   listing_id: string;
   category_id: string;
+  location_id: string;
   created_at: string;
 };
 
@@ -108,12 +129,31 @@ export interface Database {
         Update: Partial<Category>;
         Relationships: [];
       };
+      locations: {
+        Row: Location;
+        Insert: Partial<Location> & Pick<Location, "kind" | "name" | "slug">;
+        Update: Partial<Location>;
+        Relationships: [
+          {
+            foreignKeyName: "locations_parent_id_fkey";
+            columns: ["parent_id"];
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       listings: {
         Row: Listing;
         Insert: Partial<Listing> &
           Pick<
             Listing,
-            "category_id" | "provider_name" | "pitch" | "destination_link" | "bid_amount_cents" | "manage_token_hash"
+            | "category_id"
+            | "location_id"
+            | "provider_name"
+            | "pitch"
+            | "destination_link"
+            | "bid_amount_cents"
+            | "manage_token_hash"
           >;
         Update: Partial<Listing>;
         Relationships: [
@@ -121,6 +161,12 @@ export interface Database {
             foreignKeyName: "listings_category_id_fkey";
             columns: ["category_id"];
             referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "listings_location_id_fkey";
+            columns: ["location_id"];
+            referencedRelation: "locations";
             referencedColumns: ["id"];
           },
         ];
@@ -159,7 +205,7 @@ export interface Database {
       };
       click_events: {
         Row: ClickEvent;
-        Insert: Partial<ClickEvent> & Pick<ClickEvent, "listing_id" | "category_id">;
+        Insert: Partial<ClickEvent> & Pick<ClickEvent, "listing_id" | "category_id" | "location_id">;
         Update: Partial<ClickEvent>;
         Relationships: [
           {
@@ -174,6 +220,12 @@ export interface Database {
             referencedRelation: "categories";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "click_events_location_id_fkey";
+            columns: ["location_id"];
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
         ];
       };
     };
@@ -185,7 +237,7 @@ export interface Database {
     };
     Functions: {
       category_top_price_cents: {
-        Args: { p_category_id: string };
+        Args: { p_category_id: string; p_location_id: string };
         Returns: number;
       };
       increment_listing_click_count: {

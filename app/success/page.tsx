@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { getListingByManageToken, getListingById, getListingRank } from "@/lib/db/listings";
 import { getCategoryById } from "@/lib/db/categories";
+import { getLocationById } from "@/lib/db/locations";
 import { getPaymentById } from "@/lib/db/payments";
 import { formatCentsAsDollars } from "@/lib/format";
 import { Footer } from "@/components/Footer";
@@ -48,7 +49,11 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
     );
   }
 
-  const [category, rank] = await Promise.all([getCategoryById(listing.category_id), getListingRank(listing.id)]);
+  const [category, state, rank] = await Promise.all([
+    getCategoryById(listing.category_id),
+    getLocationById(listing.location_id),
+    getListingRank(listing.id),
+  ]);
 
   // On a re-bid (or a duplicate-URL top-up) the listing is already
   // published - status alone can't tell this specific checkout apart from
@@ -71,6 +76,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
           <p className="text-sm font-medium text-green">You&apos;re live</p>
           <p className="mt-1 font-display text-2xl font-bold text-ink">
             #{rank} in {category?.name ?? "your category"}
+            {state ? `, ${state.name}` : ""}
           </p>
           <p className="mt-1 text-slate">
             {listing.provider_name} · {formatCentsAsDollars(listing.bid_amount_cents)}
@@ -108,8 +114,11 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
         </p>
       )}
 
-      {category && (
-        <Link href={`/?category=${category.slug}`} className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline">
+      {category && state && (
+        <Link
+          href={`/${state.slug}?category=${category.slug}`}
+          className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline"
+        >
           <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
           View the {category.name} leaderboard
         </Link>

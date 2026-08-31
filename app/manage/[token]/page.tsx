@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { getCategoryById } from "@/lib/db/categories";
+import { getLocationById } from "@/lib/db/locations";
 import { getCategoryPricing, getListingByManageToken, getListingRank } from "@/lib/db/listings";
 import { listPaymentsForListing } from "@/lib/db/payments";
 import { formatCentsAsDollars, formatTimeSince } from "@/lib/format";
@@ -37,10 +38,13 @@ export default async function ManageListingPage({ params }: { params: { token: s
     );
   }
 
-  const category = await getCategoryById(listing.category_id);
+  const [category, state] = await Promise.all([
+    getCategoryById(listing.category_id),
+    getLocationById(listing.location_id),
+  ]);
   const [rank, pricing, payments] = await Promise.all([
     getListingRank(listing.id),
-    category ? getCategoryPricing(category.id, category.min_bid_cents) : null,
+    category ? getCategoryPricing(category.id, listing.location_id, category.min_bid_cents) : null,
     listPaymentsForListing(listing.id),
   ]);
 
@@ -64,6 +68,10 @@ export default async function ManageListingPage({ params }: { params: { token: s
         <div>
           <dt className="text-slate">Category</dt>
           <dd className="font-medium text-ink">{category?.name ?? "-"}</dd>
+        </div>
+        <div>
+          <dt className="text-slate">State</dt>
+          <dd className="font-medium text-ink">{state?.name ?? "-"}</dd>
         </div>
         <div>
           <dt className="text-slate">Current rank</dt>
@@ -116,8 +124,11 @@ export default async function ManageListingPage({ params }: { params: { token: s
 
       <PaymentHistory payments={payments} />
 
-      {category && (
-        <Link href={`/?category=${category.slug}`} className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline">
+      {category && state && (
+        <Link
+          href={`/${state.slug}?category=${category.slug}`}
+          className="mt-6 inline-flex items-center gap-1 text-sm text-green hover:underline"
+        >
           <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
           View the {category.name} leaderboard
         </Link>

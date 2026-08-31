@@ -7,6 +7,7 @@ export async function POST(request: Request) {
   const formData = await request.formData();
 
   const categorySlug = String(formData.get("categorySlug") ?? "");
+  const stateSlug = String(formData.get("stateSlug") ?? "");
   const providerName = String(formData.get("providerName") ?? "");
   const pitch = String(formData.get("pitch") ?? "");
   const destinationLink = String(formData.get("destinationLink") ?? "");
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
 
   const result = await submitListingAndCheckout({
     categorySlug,
+    stateSlug,
     providerName,
     pitch,
     destinationLink,

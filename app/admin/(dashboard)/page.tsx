@@ -1,27 +1,30 @@
 import { sumCompletedPaymentsCents } from "@/lib/db/payments";
-import { listAllListingsForAdmin, listAllCategoriesForAdmin } from "@/lib/db/admin";
+import { listAllListingsForAdmin, listAllCategoriesForAdmin, listAllLocationsForAdmin } from "@/lib/db/admin";
 import { formatCentsAsDollars } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
-  const [revenueCents, listings, categories] = await Promise.all([
+  const [revenueCents, listings, categories, locations] = await Promise.all([
     sumCompletedPaymentsCents(),
     listAllListingsForAdmin(),
     listAllCategoriesForAdmin(),
+    listAllLocationsForAdmin(),
   ]);
 
   const published = listings.filter((l) => l.status === "published").length;
   const pending = listings.filter((l) => l.status === "pending_payment").length;
+  const activeStates = locations.filter((l) => l.kind === "state" && l.is_active).length;
 
   return (
     <div>
       <h1 className="font-display text-xl font-bold text-ink">Overview</h1>
-      <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
         <Stat label="Revenue (completed)" value={formatCentsAsDollars(revenueCents)} />
         <Stat label="Published listings" value={String(published)} />
         <Stat label="Pending payment" value={String(pending)} />
         <Stat label="Categories" value={String(categories.length)} />
+        <Stat label="Active states" value={String(activeStates)} />
       </div>
       <p className="mt-6 text-sm text-slate">
         Revenue is summed from `payments` where status = completed - should match whatever your payment provider

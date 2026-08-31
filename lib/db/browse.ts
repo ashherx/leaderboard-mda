@@ -20,22 +20,23 @@ export interface CategoryBrowseData {
 const PAGE_SIZE = 25;
 
 /**
- * Everything one category's browse view needs, in one call - the unified
- * board fetches this once per category+page (server-side on first load,
- * client-side via /api/categories/[slug]/browse on every subsequent
- * switch) instead of the four separate queries the old per-category page
- * ran through four separate components.
+ * Everything one category+state board needs, in one call - the unified
+ * board fetches this once per category+state+page (server-side on first
+ * load, client-side via /api/states/[state]/categories/[slug]/browse on
+ * every subsequent switch) instead of the four separate queries the old
+ * per-category page ran through four separate components.
  */
 export async function getCategoryBrowseData(
   categoryId: string,
+  locationId: string,
   minBidCents: number,
   page: number
 ): Promise<CategoryBrowseData> {
   const [{ listings, total }, pricing, trending, latestActivity] = await Promise.all([
-    listPublishedListingsForCategory(categoryId, { page, pageSize: PAGE_SIZE }),
-    getCategoryPricing(categoryId, minBidCents),
-    getTrendingListings(categoryId),
-    getLatestActivity(categoryId),
+    listPublishedListingsForCategory(categoryId, locationId, { page, pageSize: PAGE_SIZE }),
+    getCategoryPricing(categoryId, locationId, minBidCents),
+    getTrendingListings(categoryId, locationId),
+    getLatestActivity(categoryId, locationId),
   ]);
 
   return { listings, total, page, pageSize: PAGE_SIZE, pricing, trending, latestActivity };
@@ -51,9 +52,10 @@ export async function getCategoryBrowseData(
  * getLatestActivity), and the merged listing feed already serves discovery
  * here on its own. The UI hides the panels that would've used those stubs
  * (see LeaderboardBrowser) rather than pretending they mean something.
+ * Still scoped to one state - "All" merges categories, not states.
  */
-export async function getAllCategoriesBrowseData(page: number): Promise<CategoryBrowseData> {
-  const { listings, total } = await listPublishedListingsAcrossAllCategories({ page, pageSize: PAGE_SIZE });
+export async function getAllCategoriesBrowseData(locationId: string, page: number): Promise<CategoryBrowseData> {
+  const { listings, total } = await listPublishedListingsAcrossAllCategories(locationId, { page, pageSize: PAGE_SIZE });
 
   return {
     listings,

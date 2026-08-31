@@ -33,11 +33,16 @@ import { ALL_CATEGORIES_NAME, ALL_CATEGORIES_SLUG } from "@/lib/all-categories";
  */
 export function LeaderboardBrowser({
   categories,
+  stateSlug,
+  stateName,
   initialSlug,
   initialData,
   statsPill,
 }: {
   categories: Category[];
+  /** Which state's board this is - every category/page switch below stays within this state; switching state itself is a real navigation (see StateSwitcher), not something this component drives. */
+  stateSlug: string;
+  stateName: string;
   initialSlug: string;
   initialData: CategoryBrowseData;
   statsPill: ReactNode;
@@ -72,7 +77,7 @@ export function LeaderboardBrowser({
       return;
     }
 
-    fetch(`/api/categories/${claimSlug}/browse?page=1`)
+    fetch(`/api/states/${stateSlug}/categories/${claimSlug}/browse?page=1`)
       .then((res) => res.json())
       .then((payload: CategoryBrowseData) => {
         cache.current.set(key, payload);
@@ -81,7 +86,7 @@ export function LeaderboardBrowser({
       .catch(() => {
         /* transient - claim panel just keeps showing its last known pricing */
       });
-  }, [claimSlug]);
+  }, [claimSlug, stateSlug]);
 
   const load = useCallback((slug: string, page: number) => {
     const key = `${slug}:${page}`;
@@ -93,7 +98,7 @@ export function LeaderboardBrowser({
     }
 
     setLoading(true);
-    fetch(`/api/categories/${slug}/browse?page=${page}`)
+    fetch(`/api/states/${stateSlug}/categories/${slug}/browse?page=${page}`)
       .then((res) => res.json())
       .then((payload: CategoryBrowseData) => {
         cache.current.set(key, payload);
@@ -103,7 +108,7 @@ export function LeaderboardBrowser({
         /* transient - stay on whatever was showing */
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [stateSlug]);
 
   function selectCategory(slug: string) {
     if (slug !== ALL_CATEGORIES_SLUG) setClaimSlug(slug);
@@ -126,13 +131,17 @@ export function LeaderboardBrowser({
 
   return (
     <>
-      <h1 className="sr-only">{category.name} leaderboard</h1>
+      <h1 className="sr-only">
+        {category.name} leaderboard - {stateName}
+      </h1>
 
       <div className="mt-6">{statsPill}</div>
 
       {claimData && (
         <div className="mt-8">
           <ClaimPanel
+            stateSlug={stateSlug}
+            stateName={stateName}
             selectedSlug={claimSlug}
             selectedCategoryName={claimCategoryName}
             pricing={claimData.pricing}

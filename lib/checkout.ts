@@ -1,4 +1,5 @@
 import { getCategoryById, getCategoryBySlug } from "@/lib/db/categories";
+import { getLocationById, getStateBySlug } from "@/lib/db/locations";
 import {
   createPendingListing,
   findActiveListingByDestinationLinkKey,
@@ -186,7 +187,10 @@ export async function completeLemonSqueezyPayment(
 
   // Fire-and-forget - a broken mail config should never fail the webhook
   // (Lemon Squeezy retries on non-2xx, and the listing is already live).
-  const category = await getCategoryById(listing.category_id);
+  const [category, state] = await Promise.all([
+    getCategoryById(listing.category_id),
+    getLocationById(listing.location_id),
+  ]);
   void sendAdminNotification(
     isNewClaim
       ? `New listing claimed: ${listing.provider_name}`
@@ -196,6 +200,7 @@ export async function completeLemonSqueezyPayment(
       "",
       `Provider: ${listing.provider_name}`,
       `Category: ${category?.name ?? listing.category_id}`,
+      `State: ${state?.name ?? listing.location_id}`,
       `Bid: $${(targetBidAmountCents / 100).toFixed(2)}`,
       `Charged: $${(payment.amount_cents / 100).toFixed(2)}`,
       `Destination: ${listing.destination_link}`,
@@ -206,6 +211,8 @@ export async function completeLemonSqueezyPayment(
 
 export interface SubmitListingInput extends ListingContentInput {
   categorySlug: string;
+  /** Which state's board this claims a spot on - fixed at submission, same as the destination link (see createPendingListing's locationId). */
+  stateSlug: string;
   bidDollars: number;
 }
 
@@ -224,11 +231,14 @@ export type SubmitListingResult =
 /**
  * Creates a new listing in pending_payment status and opens a Lemon Squeezy
  * checkout for it - unless the destination URL already belongs to another
- * *published* listing (any category), in which case this becomes a top-up
- * checkout against *that* listing instead of a second row for the same
- * business. A listing still stuck in pending_payment for the same URL never
- * went live, so it doesn't count here and this submission is free to proceed
- * as a normal new listing. That listing's content/manage-token are untouched either way;
+ * *published* listing in this same state (any category), in which case this
+ * becomes a top-up checkout against *that* listing instead of a second row
+ * for the same business. Scoped to state, not global: the same URL claiming
+ * a spot in a different state is a genuinely separate board (see
+ * findActiveListingByDestinationLinkKey), so it always gets its own
+ * listing there. A listing still stuck in pending_payment for the same URL
+ * never went live, so it doesn't count here and this submission is free to
+ * proceed as a normal new listing. That listing's content/manage-token are untouched either way;
  * the submitter here doesn't get a manage link for it (see
  * startLemonSqueezyCheckout's manageToken param and app/success/page.tsx).
  * Either way, nothing goes live until Lemon Squeezy's webhook confirms payment.
@@ -236,6 +246,9 @@ export type SubmitListingResult =
 export async function submitListingAndCheckout(input: SubmitListingInput): Promise<SubmitListingResult> {
   const category = await getCategoryBySlug(input.categorySlug);
   if (!category) return { ok: false, error: "Category not found." };
+
+  const state = await getStateBySlug(input.stateSlug);
+  if (!state) return { ok: false, error: "State not found or not yet open for listings." };
 
   const content = validateListingContent(input);
   if (!content.ok) return content;
@@ -248,7 +261,7 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
     return { ok: false, error: `Minimum bid for this category is $${category.min_bid_cents / 100}.` };
   }
 
-  const existing = await findActiveListingByDestinationLinkKey(normalizeUrlKey(content.destinationLink));
+  const existing = await findActiveListingByDestinationLinkKey(normalizeUrlKey(content.destinationLink), state.id);
   if (existing) {
     const chargeAmountCents = bidAmountCents - existing.bid_amount_cents;
     if (chargeAmountCents <= 0) {
@@ -279,6 +292,7 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
 
   const { listing, rawManageToken } = await createPendingListing({
     categoryId: category.id,
+    locationId: state.id,
     providerName: content.providerName,
     pitch: content.pitch,
     destinationLink: content.destinationLink,

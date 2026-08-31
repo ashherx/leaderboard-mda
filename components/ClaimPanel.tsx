@@ -9,12 +9,16 @@ import type { CategoryPricing } from "@/lib/db/types";
 const STEP_DOLLARS = 1;
 
 export function ClaimPanel({
+  stateSlug,
+  stateName,
   selectedSlug,
   selectedCategoryName,
   pricing,
   categories,
   onSelectCategory,
 }: {
+  stateSlug: string;
+  stateName: string;
   selectedSlug: string;
   selectedCategoryName: string;
   pricing: CategoryPricing;
@@ -51,7 +55,9 @@ export function ClaimPanel({
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
-      fetch(`/api/categories/${selectedSlug}/preview-rank?bid=${bidDollars}`, { signal: controller.signal })
+      fetch(`/api/states/${stateSlug}/categories/${selectedSlug}/preview-rank?bid=${bidDollars}`, {
+        signal: controller.signal,
+      })
         .then((res) => res.json())
         .then((data) => {
           if (data.rank) setPreviewRank(data.rank);
@@ -65,13 +71,13 @@ export function ClaimPanel({
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [bidDollars, currentTopDollars, selectedSlug]);
+  }, [bidDollars, currentTopDollars, selectedSlug, stateSlug]);
 
   function adjust(delta: number) {
     setBidDollars((current) => Math.max(minDollars, current + delta));
   }
 
-  const claimHref = `/claim?category=${selectedSlug}&amount=${bidDollars}${link ? `&link=${encodeURIComponent(link)}` : ""}`;
+  const claimHref = `/claim?category=${selectedSlug}&state=${stateSlug}&amount=${bidDollars}${link ? `&link=${encodeURIComponent(link)}` : ""}`;
 
   return (
     <div className="text-center">
@@ -97,6 +103,7 @@ export function ClaimPanel({
             <ArrowUpIcon weight="duotone" className="h-4 w-4" />
           </button>
         </div>
+        <span className="font-display text-3xl font-bold text-ink sm:text-4xl">in {stateName}</span>
       </div>
 
       <p className="mx-auto mt-3 max-w-md text-sm text-slate">
