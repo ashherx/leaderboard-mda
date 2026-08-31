@@ -40,14 +40,9 @@ export function LeaderboardBrowser({
 
   return (
     <>
-      <div className="max-w-2xl">
-        <h1 className="font-display text-3xl font-bold text-ink sm:text-4xl">
-          {isAll ? "Sponsored service provider leaderboards" : `${category.name} service provider leaderboard`}
-        </h1>
-        <p className="mt-2 text-sm text-slate sm:text-base">
-          Rankings reflect paid bids, not reviews, service quality, vetting, or an endorsement by The Podium.
-        </p>
-      </div>
+      <h1 className="sr-only">
+        {isAll ? "Sponsored service provider leaderboards" : `${category.name} service provider leaderboard`}
+      </h1>
 
       <div className="mt-6">{statsPill}</div>
 

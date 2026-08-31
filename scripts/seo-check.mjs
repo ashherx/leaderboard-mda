@@ -65,7 +65,7 @@ assert.equal(meta(home.body, "property", "og:image:width"), "1200");
 assert.equal(meta(home.body, "property", "og:image:height"), "630");
 assert.match(home.body, /<link rel="icon"[^>]+sizes="512x512"/);
 assert.match(home.body, /<link rel="apple-touch-icon"[^>]+sizes="180x180"/);
-assert.match(home.body, /<h1[^>]*>Sponsored service provider leaderboards<\/h1>/);
+assert.match(home.body, /<h1 class="sr-only">Sponsored service provider leaderboards<\/h1>/);
 assert.match(
   home.body,
   /Claim #(?:<!-- -->)?1/,
@@ -94,7 +94,7 @@ assert.equal(category.response.status, 200);
 assert.equal(canonical(category.body), `${canonicalOrigin}${categoryPath}`);
 assert.equal(meta(category.body, "property", "og:url"), `${canonicalOrigin}${categoryPath}`);
 assert.match(title(category.body), /Service Providers Leaderboard \| The Podium$/);
-assert.match(category.body, /<h1[^>]*>[^<]+ service provider leaderboard<\/h1>/);
+assert.match(category.body, /<h1 class="sr-only">[^<]+ service provider leaderboard<\/h1>/);
 assert.match(category.body, /BreadcrumbList|CollectionPage/);
 assert.match(category.body, /href="\/categories\//);
 const categoryGraph = jsonLd(category.body).find((item) => Array.isArray(item["@graph"]))?.["@graph"];
