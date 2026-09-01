@@ -10,12 +10,14 @@ export function ClaimPanelRouter({
   stateName,
   selectedSlug,
   pricing,
+  showCategoryName = true,
 }: {
   categories: Category[];
   stateSlug: string;
   stateName: string;
   selectedSlug: string;
   pricing: CategoryPricing;
+  showCategoryName?: boolean;
 }) {
   const router = useRouter();
 
@@ -26,7 +28,7 @@ export function ClaimPanelRouter({
       selectedSlug={selectedSlug}
       stateSlug={stateSlug}
       stateName={stateName}
-      selectedCategoryName={selectedCategoryName}
+      selectedCategoryName={showCategoryName ? selectedCategoryName : ""}
       pricing={pricing}
       categories={categories.map(({ slug, name }) => ({ slug, name }))}
       onSelectCategory={(slug) => router.push(`/${stateSlug}/${slug}`)}

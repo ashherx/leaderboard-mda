@@ -50,16 +50,21 @@ export function LeaderboardBrowser({
 
       <div className="mt-6">{statsPill}</div>
 
+      {/* "All" isn't a real category - there's nothing to bid into until a
+          specific one is picked from the tabs below, so the claim panel
+          (which always needs one concrete category to price/claim into)
+          stays hidden here rather than silently defaulting to the first
+          category as if it were selected. */}
       <div className="mt-8">
-        <ClaimPanelRouter
-          categories={categories}
-          stateSlug={stateSlug}
-          stateName={stateName}
-          selectedSlug={initialClaimSlug}
-          pricing={initialClaimPricing}
-        />
-      </div>
-
+          <ClaimPanelRouter
+            categories={categories}
+            stateSlug={stateSlug}
+            stateName={stateName}
+            selectedSlug={initialClaimSlug}
+            pricing={initialClaimPricing}
+            showCategoryName={!isAll}
+          />
+        </div>
       <div className="mt-8">
         <CategoryTabs categories={tabCategories} selectedSlug={initialSlug} stateSlug={stateSlug} />
       </div>
