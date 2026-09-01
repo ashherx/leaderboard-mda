@@ -227,11 +227,13 @@ export type SubmitListingResult =
 /**
  * Creates a new listing in pending_payment status and opens a Lemon Squeezy
  * checkout for it - unless the destination URL already belongs to another
- * *published* listing (any category), in which case this becomes a top-up
- * checkout against *that* listing instead of a second row for the same
- * business. A listing still stuck in pending_payment for the same URL never
- * went live, so it doesn't count here and this submission is free to proceed
- * as a normal new listing. That listing's content/manage-token are untouched either way;
+ * *published* listing in the requested state (any category), in which case
+ * this becomes a top-up checkout against *that* listing instead of a second
+ * row for the same business in that state. The same URL can be listed
+ * independently in other states, each starting from that state's category
+ * floor price. A listing still stuck in pending_payment for the same URL
+ * never went live, so it doesn't count here and this submission is free to
+ * proceed as a normal new listing. That listing's content/manage-token are untouched either way;
  * the submitter here doesn't get a manage link for it (see
  * startLemonSqueezyCheckout's manageToken param and app/success/page.tsx).
  * Either way, nothing goes live until Lemon Squeezy's webhook confirms payment.
@@ -254,7 +256,10 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
     return { ok: false, error: `Minimum bid for this category is $${category.min_bid_cents / 100}.` };
   }
 
-  const existing = await findActiveListingByDestinationLinkKey(normalizeUrlKey(content.destinationLink));
+  const existing = await findActiveListingByDestinationLinkKey(
+    normalizeUrlKey(content.destinationLink),
+    state.id
+  );
   if (existing) {
     const chargeAmountCents = bidAmountCents - existing.bid_amount_cents;
     if (chargeAmountCents <= 0) {

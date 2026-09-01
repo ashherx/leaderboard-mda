@@ -342,21 +342,23 @@ export async function getListingById(listingId: string): Promise<Listing | null>
 }
 
 /**
- * Finds an existing, live (published) listing for the same destination URL,
- * anywhere in the site - used to fold a duplicate submission into a top-up
- * of the existing listing instead of creating a second row for it (see
- * submitListingAndCheckout). Listings still stuck in pending_payment (an
- * abandoned/incomplete checkout) never went live, so they're deliberately
- * excluded - otherwise the URL would be unreclaimable and every future
- * submitter would get told it's "already listed" for a listing nobody can
- * ever see.
+ * Finds an existing, live (published) listing for the same destination URL
+ * within a state - used to fold a duplicate submission into a top-up of the
+ * existing listing instead of creating a second row for it (see
+ * submitListingAndCheckout). A URL may be listed once per state, since each
+ * state has its own leaderboard and pricing. Listings still stuck in
+ * pending_payment (an abandoned/incomplete checkout) never went live, so
+ * they're deliberately excluded - otherwise the URL would be unreclaimable
+ * and every future submitter would get told it's "already listed" for a
+ * listing nobody can ever see.
  */
-export async function findActiveListingByDestinationLinkKey(key: string): Promise<Listing | null> {
+export async function findActiveListingByDestinationLinkKey(key: string, stateId: string): Promise<Listing | null> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
     .from("listings")
     .select("*")
     .eq("destination_link_key", key)
+    .eq("location_id", stateId)
     .eq("status", "published")
     .order("created_at", { ascending: true })
     .limit(1)
