@@ -13,6 +13,8 @@ import { StatsPill } from "@/components/StatsPill";
 
 export const dynamic = "force-dynamic";
 
+import { redirect } from "next/navigation";
+
 type SearchParams = { category?: string; page?: string };
 
 const TITLE = "The Podium | Sponsored Service Provider Leaderboards";
@@ -39,6 +41,7 @@ export function generateMetadata(): Metadata {
  * predate states entirely and there's no way to know which one they meant).
  */
 export default async function RootPage({ searchParams }: { searchParams: SearchParams }) {
+  redirect("/texas");
   const page = parsePageParam(searchParams.page);
   if (page === null) notFound();
 
