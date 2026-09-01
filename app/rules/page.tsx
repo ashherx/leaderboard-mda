@@ -5,6 +5,8 @@ import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
 import { buildPageMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = buildPageMetadata({
   title: "Leaderboard Rules | The Podium",
   description: "How sponsored ranking works, what providers may list, and what a paid bid claims on The Podium.",

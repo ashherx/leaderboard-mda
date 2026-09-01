@@ -6,6 +6,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_NAME, SUPPORT_EMAIL } from "@/lib/site";
 import { buildPageMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = buildPageMetadata({
   title: `Refund Policy | ${SITE_NAME}`,
   description: `When sponsored ranking purchases on ${SITE_NAME} are final and the limited cases where a refund may be available.`,

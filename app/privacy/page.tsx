@@ -6,6 +6,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_NAME, SUPPORT_EMAIL } from "@/lib/site";
 import { buildPageMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = buildPageMetadata({
   title: `Privacy Notice | ${SITE_NAME}`,
   description: `What ${SITE_NAME} collects, why it is collected, and which service providers process it.`,

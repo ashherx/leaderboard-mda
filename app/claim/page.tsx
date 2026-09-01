@@ -45,7 +45,7 @@ export default async function ClaimPage({
   return (
     <>
       <VisitTracker />
-      <SiteHeader />
+      <SiteHeader currentStateSlug={state.slug} currentCategorySlug={category.slug} />
       <main className="mx-auto max-w-lg px-4 py-10">
         <Link
           href={`/${state.slug}/${category.slug}`}

@@ -59,7 +59,7 @@ export default async function ManageListingPage({ params }: { params: { token: s
 
   return (
     <>
-    <SiteHeader />
+    <SiteHeader currentStateSlug={state?.slug} currentCategorySlug={category?.slug} />
     <main className="mx-auto max-w-lg px-4 py-10">
       <p className="text-sm text-slate">Manage your listing</p>
       <h1 className="mt-1 font-display text-2xl font-bold text-ink">{listing.provider_name}</h1>

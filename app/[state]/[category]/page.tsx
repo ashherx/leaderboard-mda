@@ -110,11 +110,12 @@ export default async function StateCategoryPage({ params, searchParams }: PagePr
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
       <VisitTracker />
-      <SiteHeader />
+      <SiteHeader currentStateSlug={state.slug} currentCategorySlug={category.slug} />
       <main className="mx-auto max-w-4xl px-4 py-8">
         <LeaderboardBrowser
           categories={categories}
           stateSlug={state.slug}
+          stateName={state.name}
           initialSlug={category.slug}
           initialData={initialData}
           initialClaimSlug={category.slug}

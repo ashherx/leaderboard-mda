@@ -7,11 +7,13 @@ import type { Category, CategoryPricing } from "@/lib/db/types";
 export function ClaimPanelRouter({
   categories,
   stateSlug,
+  stateName,
   selectedSlug,
   pricing,
 }: {
   categories: Category[];
   stateSlug: string;
+  stateName: string;
   selectedSlug: string;
   pricing: CategoryPricing;
 }) {
@@ -23,6 +25,7 @@ export function ClaimPanelRouter({
     <ClaimPanel
       selectedSlug={selectedSlug}
       stateSlug={stateSlug}
+      stateName={stateName}
       selectedCategoryName={selectedCategoryName}
       pricing={pricing}
       categories={categories.map(({ slug, name }) => ({ slug, name }))}

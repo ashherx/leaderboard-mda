@@ -76,7 +76,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { to
 
   return (
     <>
-    <SiteHeader />
+    <SiteHeader currentStateSlug={state?.slug} currentCategorySlug={category?.slug} />
     <main className="mx-auto max-w-lg px-4 py-16">
       {isLive ? (
         <div className="rounded-xl border border-green bg-green/8 p-6 text-center">

@@ -12,6 +12,7 @@ import { ALL_CATEGORIES_NAME, ALL_CATEGORIES_SLUG } from "@/lib/all-categories";
 export function LeaderboardBrowser({
   categories,
   stateSlug,
+  stateName,
   initialSlug,
   initialData,
   initialClaimSlug,
@@ -20,6 +21,7 @@ export function LeaderboardBrowser({
 }: {
   categories: Category[];
   stateSlug: string;
+  stateName: string;
   initialSlug: string;
   initialData: CategoryBrowseData;
   initialClaimSlug: string;
@@ -52,6 +54,7 @@ export function LeaderboardBrowser({
         <ClaimPanelRouter
           categories={categories}
           stateSlug={stateSlug}
+          stateName={stateName}
           selectedSlug={initialClaimSlug}
           pricing={initialClaimPricing}
         />

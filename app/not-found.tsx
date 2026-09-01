@@ -3,6 +3,8 @@ import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Footer } from "@/components/Footer";
 
+export const dynamic = "force-dynamic";
+
 export default function NotFound() {
   return (
     <>

@@ -9,11 +9,16 @@ export function CategoryDropdown({
   selectedSlug,
   onSelect,
   className = "",
+  placeholder = "Choose a category",
+  buttonClassName = "px-4 py-2.5",
 }: {
   categories: { slug: string; name: string }[];
-  selectedSlug: string;
+  selectedSlug: string | undefined;
   onSelect: (slug: string) => void;
   className?: string;
+  placeholder?: string;
+  /** Overrides the trigger button's padding/text sizing for tighter contexts (e.g. the header's state switcher) without touching the layout/hover/focus styles every caller shares. */
+  buttonClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -44,9 +49,9 @@ export function CategoryDropdown({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-white px-4 py-2.5 text-left text-ink outline-none transition-colors hover:border-gold focus:border-green"
+        className={`flex w-full items-center justify-between gap-2 rounded-md border border-border bg-white text-left text-ink outline-none transition-colors hover:border-gold focus:border-green ${buttonClassName}`}
       >
-        <span className="truncate">{selected?.name ?? "Choose a category"}</span>
+        <span className="truncate">{selected?.name ?? placeholder}</span>
         <CaretDown
           weight="bold"
           className={`h-3.5 w-3.5 shrink-0 text-slate transition-transform ${open ? "rotate-180" : ""}`}

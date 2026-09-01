@@ -11,6 +11,7 @@ const STEP_DOLLARS = 1;
 export function ClaimPanel({
   selectedSlug,
   stateSlug,
+  stateName,
   selectedCategoryName,
   pricing,
   categories,
@@ -18,6 +19,7 @@ export function ClaimPanel({
 }: {
   selectedSlug: string;
   stateSlug: string;
+  stateName: string;
   selectedCategoryName: string;
   pricing: CategoryPricing;
   categories: { slug: string; name: string }[];
@@ -79,7 +81,9 @@ export function ClaimPanel({
 
   return (
     <div className="text-center">
-      <p className="text-sm font-medium uppercase tracking-wide text-slate">in {selectedCategoryName}</p>
+      <p className="text-sm font-medium uppercase tracking-wide text-slate">
+        in {selectedCategoryName} · {stateName}
+      </p>
       <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
         <span className="font-display text-3xl font-bold text-ink sm:text-4xl">Claim #{previewRank} for</span>
         <div className="flex items-center gap-2">
@@ -101,6 +105,7 @@ export function ClaimPanel({
             <ArrowUpIcon weight="duotone" className="h-4 w-4" />
           </button>
         </div>
+        <span className="font-display text-3xl font-bold text-ink sm:text-4xl">in {stateName}</span>
       </div>
 
       <p className="mx-auto mt-3 max-w-md text-sm text-slate">

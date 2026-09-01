@@ -6,6 +6,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_NAME, SUPPORT_EMAIL } from "@/lib/site";
 import { buildPageMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = buildPageMetadata({
   title: `Terms of Service | ${SITE_NAME}`,
   description: `The terms that apply when using ${SITE_NAME} or purchasing a sponsored leaderboard rank.`,
