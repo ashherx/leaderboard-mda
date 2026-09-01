@@ -25,9 +25,25 @@ export type Category = {
   updated_at: string;
 };
 
+export type LocationKind = "country" | "state" | "city";
+
+/** Hierarchical country -> state -> city, via self-referencing parent_id. Only "state" rows are used today; "city" is schema room for later, not yet exposed anywhere. */
+export type Location = {
+  id: string;
+  parent_id: string | null;
+  kind: LocationKind;
+  name: string;
+  slug: string;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Listing = {
   id: string;
   category_id: string;
+  location_id: string;
   provider_name: string;
   pitch: string | null;
   destination_link: string;
@@ -96,6 +112,7 @@ export type ClickEvent = {
   id: string;
   listing_id: string;
   category_id: string;
+  location_id: string;
   created_at: string;
 };
 
@@ -108,12 +125,31 @@ export interface Database {
         Update: Partial<Category>;
         Relationships: [];
       };
+      locations: {
+        Row: Location;
+        Insert: Partial<Location> & Pick<Location, "kind" | "name" | "slug">;
+        Update: Partial<Location>;
+        Relationships: [
+          {
+            foreignKeyName: "locations_parent_id_fkey";
+            columns: ["parent_id"];
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       listings: {
         Row: Listing;
         Insert: Partial<Listing> &
           Pick<
             Listing,
-            "category_id" | "provider_name" | "pitch" | "destination_link" | "bid_amount_cents" | "manage_token_hash"
+            | "category_id"
+            | "location_id"
+            | "provider_name"
+            | "pitch"
+            | "destination_link"
+            | "bid_amount_cents"
+            | "manage_token_hash"
           >;
         Update: Partial<Listing>;
         Relationships: [
@@ -121,6 +157,12 @@ export interface Database {
             foreignKeyName: "listings_category_id_fkey";
             columns: ["category_id"];
             referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "listings_location_id_fkey";
+            columns: ["location_id"];
+            referencedRelation: "locations";
             referencedColumns: ["id"];
           },
         ];
@@ -159,7 +201,7 @@ export interface Database {
       };
       click_events: {
         Row: ClickEvent;
-        Insert: Partial<ClickEvent> & Pick<ClickEvent, "listing_id" | "category_id">;
+        Insert: Partial<ClickEvent> & Pick<ClickEvent, "listing_id" | "category_id" | "location_id">;
         Update: Partial<ClickEvent>;
         Relationships: [
           {
@@ -174,6 +216,12 @@ export interface Database {
             referencedRelation: "categories";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "click_events_location_id_fkey";
+            columns: ["location_id"];
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
         ];
       };
     };
@@ -185,7 +233,7 @@ export interface Database {
     };
     Functions: {
       category_top_price_cents: {
-        Args: { p_category_id: string };
+        Args: { p_category_id: string; p_location_id: string };
         Returns: number;
       };
       increment_listing_click_count: {

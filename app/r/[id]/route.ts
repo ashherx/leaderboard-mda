@@ -46,7 +46,10 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 
   const userAgent = _request.headers.get("user-agent") ?? "";
   if (!CRAWLER_USER_AGENT.test(userAgent)) {
-    await Promise.all([incrementClickCount(listing.id), recordClickEvent(listing.id, listing.category_id)]);
+    await Promise.all([
+      incrementClickCount(listing.id),
+      recordClickEvent(listing.id, listing.category_id, listing.location_id),
+    ]);
   }
 
   return redirectWithoutIndex(withUtmSource(target.toString()), 302);

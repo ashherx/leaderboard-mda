@@ -1,14 +1,17 @@
 import { listActiveCategories } from "@/lib/db/categories";
+import { listActiveStates } from "@/lib/db/locations";
 import { absoluteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const categories = await listActiveCategories();
-  const categoryLinks = categories
-    .map(
-      (category) =>
-        `- [${category.name} service provider leaderboard](${absoluteUrl(`/categories/${category.slug}`)}): Sponsored listings ranked by paid bid within ${category.name}.`
+  const [states, categories] = await Promise.all([listActiveStates(), listActiveCategories()]);
+  const categoryLinks = states
+    .flatMap((state) =>
+      categories.map(
+        (category) =>
+          `- [${state.name} ${category.name} service provider leaderboard](${absoluteUrl(`/${state.slug}/${category.slug}`)}): Sponsored listings ranked by paid bid within ${category.name} in ${state.name}.`
+      )
     )
     .join("\n");
 
@@ -18,7 +21,7 @@ export async function GET() {
 
 Important interpretation notes:
 - A rank reflects payment amount only. It is not a review, quality score, vetting result, or endorsement.
-- Categories are independent; bids are never compared across different service categories.
+- Categories and states are independent; bids are never compared across different service categories or states.
 - Listing content is submitted by providers and may change.
 
 ## Leaderboards

@@ -4,9 +4,11 @@ const TRENDING_WINDOW_MINUTES = 60;
 const PANEL_LIMIT = 5;
 
 /** One row per click, alongside the running-total increment on listings.click_count. */
-export async function recordClickEvent(listingId: string, categoryId: string): Promise<void> {
+export async function recordClickEvent(listingId: string, categoryId: string, stateId: string): Promise<void> {
   const supabase = getSupabaseServerClient();
-  const { error } = await supabase.from("click_events").insert({ listing_id: listingId, category_id: categoryId });
+  const { error } = await supabase
+    .from("click_events")
+    .insert({ listing_id: listingId, category_id: categoryId, location_id: stateId });
   if (error) throw error;
 }
 
@@ -18,7 +20,7 @@ export interface TrendingListing {
 }
 
 /** Real clicks-per-hour, from the click_events log - not a relabeled lifetime total. */
-export async function getTrendingListings(categoryId: string): Promise<TrendingListing[]> {
+export async function getTrendingListings(categoryId: string, stateId: string): Promise<TrendingListing[]> {
   const supabase = getSupabaseServerClient();
   const since = new Date(Date.now() - TRENDING_WINDOW_MINUTES * 60 * 1000).toISOString();
 
@@ -26,6 +28,7 @@ export async function getTrendingListings(categoryId: string): Promise<TrendingL
     .from("click_events")
     .select("listing_id")
     .eq("category_id", categoryId)
+    .eq("location_id", stateId)
     .gt("created_at", since);
   if (error) throw error;
   if (events.length === 0) return [];
@@ -76,13 +79,14 @@ export interface ActivityItem {
  * re-deriving historical rank would need a much heavier query for a vanity
  * panel.
  */
-export async function getLatestActivity(categoryId: string): Promise<ActivityItem[]> {
+export async function getLatestActivity(categoryId: string, stateId: string): Promise<ActivityItem[]> {
   const supabase = getSupabaseServerClient();
 
   const { data: listingIdsRows, error: idsErr } = await supabase
     .from("listings")
     .select("id")
-    .eq("category_id", categoryId);
+    .eq("category_id", categoryId)
+    .eq("location_id", stateId);
   if (idsErr) throw idsErr;
   const categoryListingIds = listingIdsRows.map((r) => r.id);
   if (categoryListingIds.length === 0) return [];

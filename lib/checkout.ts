@@ -1,4 +1,5 @@
 import { getCategoryById, getCategoryBySlug } from "@/lib/db/categories";
+import { getStateById, getStateBySlug } from "@/lib/db/locations";
 import {
   createPendingListing,
   findActiveListingByDestinationLinkKey,
@@ -186,7 +187,7 @@ export async function completeLemonSqueezyPayment(
 
   // Fire-and-forget - a broken mail config should never fail the webhook
   // (Lemon Squeezy retries on non-2xx, and the listing is already live).
-  const category = await getCategoryById(listing.category_id);
+  const [category, state] = await Promise.all([getCategoryById(listing.category_id), getStateById(listing.location_id)]);
   void sendAdminNotification(
     isNewClaim
       ? `New listing claimed: ${listing.provider_name}`
@@ -196,6 +197,7 @@ export async function completeLemonSqueezyPayment(
       "",
       `Provider: ${listing.provider_name}`,
       `Category: ${category?.name ?? listing.category_id}`,
+      `State: ${state?.name ?? listing.location_id}`,
       `Bid: $${(targetBidAmountCents / 100).toFixed(2)}`,
       `Charged: $${(payment.amount_cents / 100).toFixed(2)}`,
       `Destination: ${listing.destination_link}`,
@@ -206,6 +208,7 @@ export async function completeLemonSqueezyPayment(
 
 export interface SubmitListingInput extends ListingContentInput {
   categorySlug: string;
+  stateSlug: string;
   bidDollars: number;
 }
 
@@ -236,6 +239,9 @@ export type SubmitListingResult =
 export async function submitListingAndCheckout(input: SubmitListingInput): Promise<SubmitListingResult> {
   const category = await getCategoryBySlug(input.categorySlug);
   if (!category) return { ok: false, error: "Category not found." };
+
+  const state = await getStateBySlug(input.stateSlug);
+  if (!state) return { ok: false, error: "State not found." };
 
   const content = validateListingContent(input);
   if (!content.ok) return content;
@@ -279,6 +285,7 @@ export async function submitListingAndCheckout(input: SubmitListingInput): Promi
 
   const { listing, rawManageToken } = await createPendingListing({
     categoryId: category.id,
+    stateId: state.id,
     providerName: content.providerName,
     pitch: content.pitch,
     destinationLink: content.destinationLink,

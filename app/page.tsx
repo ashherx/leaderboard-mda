@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { listActiveCategories, getCategoryBySlug } from "@/lib/db/categories";
-import { getAllCategoriesBrowseData, getCategoryBrowseData } from "@/lib/db/browse";
-import { getCategoryPricing } from "@/lib/db/listings";
-import { ALL_CATEGORIES_SLUG } from "@/lib/all-categories";
-import { pageExists, pagePath, parsePageParam } from "@/lib/pagination";
-import { absoluteUrl, buildPageMetadata, serializeJsonLd } from "@/lib/seo";
+import { listActiveStates } from "@/lib/db/locations";
+import { getCategoryBySlug } from "@/lib/db/categories";
+import { pagePath, parsePageParam } from "@/lib/pagination";
+import { buildPageMetadata } from "@/lib/seo";
+import { SOCIAL_DESCRIPTION, SOCIAL_TITLE } from "@/lib/site";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
 import { SiteHeader } from "@/components/SiteHeader";
 import { StatsPill } from "@/components/StatsPill";
-import { LeaderboardBrowser } from "@/components/LeaderboardBrowser";
-import { SOCIAL_DESCRIPTION, SOCIAL_TITLE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -19,76 +17,71 @@ type SearchParams = { category?: string; page?: string };
 
 const TITLE = "The Podium | Sponsored Service Provider Leaderboards";
 const DESCRIPTION =
-  "Browse sponsored service provider leaderboards by category, or claim a position for your business. Rankings reflect paid bids, not reviews or endorsements.";
+  "Browse sponsored service provider leaderboards by state and category, or claim a position for your business. Rankings reflect paid bids, not reviews or endorsements.";
 
-export function generateMetadata({ searchParams }: { searchParams: SearchParams }): Metadata {
-  const page = parsePageParam(searchParams.page);
-  const validPage = page ?? 1;
-  const title = validPage > 1 ? `${TITLE} - Page ${validPage}` : TITLE;
+export function generateMetadata(): Metadata {
   return buildPageMetadata({
-    title,
+    title: TITLE,
     description: DESCRIPTION,
-    path: pagePath("/", validPage),
+    path: "/",
     socialTitle: SOCIAL_TITLE,
     socialDescription: SOCIAL_DESCRIPTION,
   });
 }
 
-export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
+/**
+ * The root path has no state of its own - every leaderboard lives under
+ * /:state. With exactly one active state this used to be (and still is) an
+ * unambiguous redirect straight there; with two or more, there's no single
+ * obvious destination, so this renders a "choose your state" directory
+ * instead (also carrying forward the old query-parameter category URLs -
+ * `/?category=plumbers` - to whichever active state sorts first, since those
+ * predate states entirely and there's no way to know which one they meant).
+ */
+export default async function RootPage({ searchParams }: { searchParams: SearchParams }) {
   const page = parsePageParam(searchParams.page);
   if (page === null) notFound();
 
-  // Preserve search equity and shared links from the former query-parameter
-  // category URLs while making the destination path the only canonical form.
-  if (searchParams.category !== undefined) {
-    if (searchParams.category === ALL_CATEGORIES_SLUG) {
-      const legacyData = await getAllCategoriesBrowseData(page);
-      if (!pageExists(page, legacyData.total, legacyData.pageSize)) notFound();
-      permanentRedirect(pagePath("/", page));
-    }
+  const states = await listActiveStates();
+  if (states.length === 0) notFound();
+  const primaryState = states[0];
 
+  if (searchParams.category !== undefined) {
     const category = await getCategoryBySlug(searchParams.category);
     if (!category) notFound();
-    const legacyData = await getCategoryBrowseData(category.id, category.min_bid_cents, page);
-    if (!pageExists(page, legacyData.total, legacyData.pageSize)) notFound();
-    permanentRedirect(pagePath(`/categories/${category.slug}`, page));
+    permanentRedirect(pagePath(`/${primaryState.slug}/${category.slug}`, page ?? 1));
   }
 
-  if (searchParams.page === "1") permanentRedirect("/");
-
-  const categories = await listActiveCategories();
-  const firstCategory = categories[0];
-  if (!firstCategory) notFound();
-
-  const [initialData, initialClaimPricing] = await Promise.all([
-    getAllCategoriesBrowseData(page),
-    getCategoryPricing(firstCategory.id, firstCategory.min_bid_cents),
-  ]);
-  if (!pageExists(page, initialData.total, initialData.pageSize)) notFound();
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Sponsored service provider leaderboards",
-    description: DESCRIPTION,
-    url: absoluteUrl(pagePath("/", page)),
-    isPartOf: { "@id": `${absoluteUrl("/")}#website` },
-  };
+  if (states.length === 1) {
+    permanentRedirect(pagePath(`/${primaryState.slug}`, page ?? 1));
+  }
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
       <VisitTracker />
       <SiteHeader />
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <LeaderboardBrowser
-          categories={categories}
-          initialSlug={ALL_CATEGORIES_SLUG}
-          initialData={initialData}
-          initialClaimSlug={firstCategory.slug}
-          initialClaimPricing={initialClaimPricing}
-          statsPill={<StatsPill />}
-        />
+        <h1 className="text-center font-display text-2xl font-bold text-ink">Choose your state</h1>
+        <p className="mt-2 text-center text-slate">
+          Every leaderboard is local - pick a state to see its sponsored service provider rankings.
+        </p>
+
+        <div className="mt-6">
+          <StatsPill />
+        </div>
+
+        <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {states.map((state) => (
+            <li key={state.id}>
+              <Link
+                href={`/${state.slug}`}
+                className="block rounded-xl border border-border bg-white px-4 py-3 text-center font-medium text-ink transition-colors hover:border-gold hover:text-green"
+              >
+                {state.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </main>
       <Footer />
     </>

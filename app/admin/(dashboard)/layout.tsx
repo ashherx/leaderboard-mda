@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/listings", label: "Listings" },
   { href: "/admin/categories", label: "Categories" },
+  { href: "/admin/locations", label: "Locations" },
 ];
 
 // Internal ops tool, but styled on the same brand system as the public

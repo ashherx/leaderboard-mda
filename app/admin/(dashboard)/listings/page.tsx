@@ -1,4 +1,4 @@
-import { listAllListingsForAdmin, listAllCategoriesForAdmin } from "@/lib/db/admin";
+import { listAllListingsForAdmin, listAllCategoriesForAdmin, listAllStatesForAdmin } from "@/lib/db/admin";
 import { formatCentsAsDollars } from "@/lib/format";
 import { setVerifiedAction, unpublishListingAction, updateListingDetailsAction } from "../actions";
 import { ManageLinkButton } from "@/components/admin/ManageLinkButton";
@@ -11,16 +11,17 @@ export const dynamic = "force-dynamic";
 // (and everything after it) drifts row to row. table-fixed + explicit
 // widths make the grid rigid instead; the outer wrapper still scrolls
 // horizontally on narrow screens rather than squeezing everything down.
-const COLUMN_WIDTHS = ["14rem", "11rem", "6rem", "4.5rem", "7rem", "6.5rem", "6.5rem", "13rem", "8rem"];
+const COLUMN_WIDTHS = ["14rem", "9rem", "9rem", "6rem", "4.5rem", "7rem", "6.5rem", "6.5rem", "13rem", "8rem"];
 
 export default async function AdminListingsPage({
   searchParams,
 }: {
-  searchParams: { category?: string; status?: string };
+  searchParams: { category?: string; state?: string; status?: string };
 }) {
-  const categories = await listAllCategoriesForAdmin();
+  const [categories, states] = await Promise.all([listAllCategoriesForAdmin(), listAllStatesForAdmin()]);
   const listings = await listAllListingsForAdmin({
     categoryId: searchParams.category || undefined,
+    stateId: searchParams.state || undefined,
     status: (searchParams.status as Listing["status"]) || undefined,
   });
 
@@ -38,6 +39,18 @@ export default async function AdminListingsPage({
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
+            </option>
+          ))}
+        </select>
+        <select
+          name="state"
+          defaultValue={searchParams.state ?? ""}
+          className="rounded-md border border-border px-2 py-1 text-ink outline-none focus:border-gold"
+        >
+          <option value="">All states</option>
+          {states.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
             </option>
           ))}
         </select>
@@ -70,6 +83,7 @@ export default async function AdminListingsPage({
             <tr>
               <th className="px-3 py-2">Provider</th>
               <th className="px-3 py-2">Category</th>
+              <th className="px-3 py-2">State</th>
               <th className="whitespace-nowrap px-3 py-2">Bid / Rank</th>
               <th className="px-3 py-2">Clicks</th>
               <th className="px-3 py-2">Status</th>
@@ -109,6 +123,20 @@ export default async function AdminListingsPage({
                       {categories.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-3 py-2">
+                    <select
+                      form={formId}
+                      name="stateId"
+                      defaultValue={listing.location_id}
+                      className="w-full rounded-md border border-border px-2 py-1 outline-none focus:border-gold"
+                    >
+                      {states.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
                         </option>
                       ))}
                     </select>
@@ -161,7 +189,7 @@ export default async function AdminListingsPage({
             })}
             {listings.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-3 py-6 text-center text-slate">
+                <td colSpan={10} className="px-3 py-6 text-center text-slate">
                   No listings match these filters.
                 </td>
               </tr>

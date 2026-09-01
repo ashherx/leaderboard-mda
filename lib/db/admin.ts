@@ -1,16 +1,19 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { decryptManageToken, encryptManageToken, generateManageToken, hashManageToken } from "@/lib/manage-token";
-import type { Category, Listing, PaymentStatus } from "@/lib/db/types";
+import type { Category, Listing, Location, PaymentStatus } from "@/lib/db/types";
 
 export interface AdminListingRow extends Listing {
   categoryName: string;
   categorySlug: string;
+  stateName: string;
+  stateSlug: string;
   rank: number | null; // only meaningful when status === 'published'
   latestPaymentStatus: PaymentStatus | null;
 }
 
 export interface AdminListingFilters {
   categoryId?: string;
+  stateId?: string;
   status?: Listing["status"];
 }
 
@@ -25,10 +28,11 @@ export async function listAllListingsForAdmin(filters: AdminListingFilters = {})
 
   let query = supabase
     .from("listings")
-    .select("*, categories(name, slug)")
+    .select("*, categories(name, slug), locations(name, slug)")
     .order("created_at", { ascending: false });
 
   if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
+  if (filters.stateId) query = query.eq("location_id", filters.stateId);
   if (filters.status) query = query.eq("status", filters.status);
 
   const { data: listings, error } = await query;
@@ -56,12 +60,19 @@ export async function listAllListingsForAdmin(filters: AdminListingFilters = {})
   }
 
   return listings.map((listing) => {
-    // Supabase types this embed loosely; narrow it defensively rather than trusting shape.
-    const embedded = (listing as unknown as { categories: { name: string; slug: string } | null }).categories;
+    // Supabase types these embeds loosely; narrow them defensively rather than trusting shape.
+    const embedded = (
+      listing as unknown as {
+        categories: { name: string; slug: string } | null;
+        locations: { name: string; slug: string } | null;
+      }
+    );
     return {
       ...listing,
-      categoryName: embedded?.name ?? "-",
-      categorySlug: embedded?.slug ?? "",
+      categoryName: embedded.categories?.name ?? "-",
+      categorySlug: embedded.categories?.slug ?? "",
+      stateName: embedded.locations?.name ?? "-",
+      stateSlug: embedded.locations?.slug ?? "",
       rank: rankById.get(listing.id) ?? null,
       latestPaymentStatus: latestPaymentByListing.get(listing.id) ?? null,
     };
@@ -121,13 +132,15 @@ export async function regenerateManageToken(listingId: string): Promise<string> 
 export interface ListingDetailsUpdate {
   providerName?: string;
   categoryId?: string;
+  stateId?: string;
 }
 
 /**
- * Reassigning category_id is enough on its own - rank is derived purely
- * from bid_amount_cents within category_id (see the listing_ranks view), so
- * moving a listing to a new category just makes it compete in that
- * category's ranking on the next read. No separate re-rank step needed.
+ * Reassigning category_id/location_id is enough on its own - rank is derived
+ * purely from bid_amount_cents within (category_id, location_id) (see the
+ * listing_ranks view), so moving a listing to a new category or state just
+ * makes it compete in that board's ranking on the next read. No separate
+ * re-rank step needed.
  */
 export async function updateListingDetails(listingId: string, update: ListingDetailsUpdate): Promise<void> {
   const supabase = getSupabaseServerClient();
@@ -136,6 +149,7 @@ export async function updateListingDetails(listingId: string, update: ListingDet
     .update({
       ...(update.providerName !== undefined ? { provider_name: update.providerName } : {}),
       ...(update.categoryId !== undefined ? { category_id: update.categoryId } : {}),
+      ...(update.stateId !== undefined ? { location_id: update.stateId } : {}),
     })
     .eq("id", listingId);
   if (error) throw error;
@@ -206,6 +220,83 @@ export async function updateCategory(categoryId: string, update: CategoryUpdate)
       ...(update.minBidCents !== undefined ? { min_bid_cents: update.minBidCents } : {}),
     })
     .eq("id", categoryId)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * The single "United States" country row every state hangs off of (see
+ * migration 0016) - fixed id seeded once, not admin-managed, since country
+ * selection isn't exposed anywhere yet (see lib/db/locations.ts's note on
+ * only "state" kind being resolved today).
+ */
+const US_COUNTRY_ID = "00000000-0000-0000-0000-000000000001";
+
+/** All states, including hidden ones - for the admin locations manager. */
+export async function listAllStatesForAdmin(): Promise<Location[]> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("locations")
+    .select("*")
+    .eq("kind", "state")
+    .order("display_order", { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+/** displayOrder, if given, is used as-is (lets an admin place a new state precisely) - otherwise defaults to after everything else, same as createCategory. */
+export async function createState(name: string, displayOrder?: number): Promise<Location> {
+  const supabase = getSupabaseServerClient();
+
+  let order = displayOrder;
+  if (order === undefined) {
+    const { data: existing, error: maxErr } = await supabase
+      .from("locations")
+      .select("display_order")
+      .eq("kind", "state")
+      .order("display_order", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (maxErr) throw maxErr;
+    order = (existing?.display_order ?? 0) + 10;
+  }
+
+  const { data, error } = await supabase
+    .from("locations")
+    .insert({
+      parent_id: US_COUNTRY_ID,
+      kind: "state",
+      name,
+      slug: slugify(name),
+      display_order: order,
+    })
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export interface StateUpdate {
+  name?: string;
+  isActive?: boolean;
+  displayOrder?: number;
+}
+
+export async function updateState(stateId: string, update: StateUpdate): Promise<Location> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("locations")
+    .update({
+      ...(update.name !== undefined ? { name: update.name } : {}),
+      ...(update.isActive !== undefined ? { is_active: update.isActive } : {}),
+      ...(update.displayOrder !== undefined ? { display_order: update.displayOrder } : {}),
+    })
+    .eq("id", stateId)
+    .eq("kind", "state")
     .select("*")
     .single();
 

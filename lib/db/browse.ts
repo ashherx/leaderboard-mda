@@ -21,21 +21,22 @@ const PAGE_SIZE = 25;
 
 /**
  * Everything one category's browse view needs, in one call - the unified
- * board fetches this once per category+page (server-side on first load,
- * client-side via /api/categories/[slug]/browse on every subsequent
- * switch) instead of the four separate queries the old per-category page
- * ran through four separate components.
+ * board fetches this once per state+category+page (server-side on first
+ * load, client-side via /api/states/[stateSlug]/categories/[categorySlug]/browse
+ * on every subsequent switch) instead of the four separate queries the old
+ * per-category page ran through four separate components.
  */
 export async function getCategoryBrowseData(
   categoryId: string,
+  stateId: string,
   minBidCents: number,
   page: number
 ): Promise<CategoryBrowseData> {
   const [{ listings, total }, pricing, trending, latestActivity] = await Promise.all([
-    listPublishedListingsForCategory(categoryId, { page, pageSize: PAGE_SIZE }),
-    getCategoryPricing(categoryId, minBidCents),
-    getTrendingListings(categoryId),
-    getLatestActivity(categoryId),
+    listPublishedListingsForCategory(categoryId, stateId, { page, pageSize: PAGE_SIZE }),
+    getCategoryPricing(categoryId, stateId, minBidCents),
+    getTrendingListings(categoryId, stateId),
+    getLatestActivity(categoryId, stateId),
   ]);
 
   return { listings, total, page, pageSize: PAGE_SIZE, pricing, trending, latestActivity };
@@ -52,8 +53,8 @@ export async function getCategoryBrowseData(
  * here on its own. The UI hides the panels that would've used those stubs
  * (see LeaderboardBrowser) rather than pretending they mean something.
  */
-export async function getAllCategoriesBrowseData(page: number): Promise<CategoryBrowseData> {
-  const { listings, total } = await listPublishedListingsAcrossAllCategories({ page, pageSize: PAGE_SIZE });
+export async function getAllCategoriesBrowseData(stateId: string, page: number): Promise<CategoryBrowseData> {
+  const { listings, total } = await listPublishedListingsAcrossAllCategories(stateId, { page, pageSize: PAGE_SIZE });
 
   return {
     listings,

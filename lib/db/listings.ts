@@ -19,6 +19,7 @@ export interface PaginatedListings {
  */
 export async function listPublishedListingsForCategory(
   categoryId: string,
+  stateId: string,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE }: { page?: number; pageSize?: number } = {}
 ): Promise<PaginatedListings> {
   const supabase = getSupabaseServerClient();
@@ -28,7 +29,8 @@ export async function listPublishedListingsForCategory(
   const { count, error: countError } = await supabase
     .from("listing_ranks")
     .select("id", { count: "exact", head: true })
-    .eq("category_id", categoryId);
+    .eq("category_id", categoryId)
+    .eq("location_id", stateId);
 
   if (countError) throw countError;
   const total = count ?? 0;
@@ -38,6 +40,7 @@ export async function listPublishedListingsForCategory(
     .from("listing_ranks")
     .select("*")
     .eq("category_id", categoryId)
+    .eq("location_id", stateId)
     .order("rank", { ascending: true })
     .range(from, to);
 
@@ -46,15 +49,19 @@ export async function listPublishedListingsForCategory(
 }
 
 /**
- * Every published listing across every category, merged into one feed for
- * the "All" tab (see lib/all-categories.ts) - same sort as a single
- * category's board (bid_amount_cents desc, claimed_at asc, id asc), just
- * without the `category_id` filter. Each row keeps its own real
- * per-category `rank` from the view; nothing here computes a new
- * cross-category rank (see listing_ranks in migration 0001 for why that'd
- * be misleading).
+ * Every published listing across every category within one state, merged
+ * into one feed for the "All" tab (see lib/all-categories.ts) - same sort as
+ * a single category's board (bid_amount_cents desc, claimed_at asc, id asc),
+ * just without the `category_id` filter. Each row keeps its own real
+ * per-category+state `rank` from the view; nothing here computes a new
+ * cross-category rank (see listing_ranks in migration 0001/0016 for why
+ * that'd be misleading). Scoped to a single state for the same reason - a
+ * merged feed across states would make "biggest spender" read as
+ * "best/most active nationally," which undersells a quieter state where the
+ * same bid is genuinely competitive.
  */
 export async function listPublishedListingsAcrossAllCategories(
+  stateId: string,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE }: { page?: number; pageSize?: number } = {}
 ): Promise<PaginatedListings> {
   const supabase = getSupabaseServerClient();
@@ -63,7 +70,8 @@ export async function listPublishedListingsAcrossAllCategories(
 
   const { count, error: countError } = await supabase
     .from("listing_ranks")
-    .select("id", { count: "exact", head: true });
+    .select("id", { count: "exact", head: true })
+    .eq("location_id", stateId);
 
   if (countError) throw countError;
   const total = count ?? 0;
@@ -72,6 +80,7 @@ export async function listPublishedListingsAcrossAllCategories(
   const { data, error } = await supabase
     .from("listing_ranks")
     .select("*")
+    .eq("location_id", stateId)
     .order("bid_amount_cents", { ascending: false })
     .order("claimed_at", { ascending: true })
     .order("id", { ascending: true })
@@ -81,14 +90,19 @@ export async function listPublishedListingsAcrossAllCategories(
   return { listings: data, page, pageSize, total };
 }
 
-/** What it costs right now to become #1, plus the category's floor price. */
-export async function getCategoryPricing(categoryId: string, minBidCents: number): Promise<CategoryPricing> {
+/** What it costs right now to become #1 in this category+state, plus the category's floor price. */
+export async function getCategoryPricing(
+  categoryId: string,
+  stateId: string,
+  minBidCents: number
+): Promise<CategoryPricing> {
   const supabase = getSupabaseServerClient();
 
   const { data: current, error: currentErr } = await supabase
     .from("listing_ranks")
     .select("bid_amount_cents")
     .eq("category_id", categoryId)
+    .eq("location_id", stateId)
     .eq("rank", 1)
     .maybeSingle();
 
@@ -108,13 +122,14 @@ export interface CategoryStats {
   totalRaisedCents: number;
 }
 
-/** Homepage/category-header social proof: how many listings, how much raised, in this category. */
-export async function getCategoryStats(categoryId: string): Promise<CategoryStats> {
+/** Homepage/category-header social proof: how many listings, how much raised, in this category+state. */
+export async function getCategoryStats(categoryId: string, stateId: string): Promise<CategoryStats> {
   const supabase = getSupabaseServerClient();
   const { data, error, count } = await supabase
     .from("listings")
     .select("bid_amount_cents", { count: "exact" })
     .eq("category_id", categoryId)
+    .eq("location_id", stateId)
     .eq("status", "published");
 
   if (error) throw error;
@@ -137,12 +152,13 @@ export async function getCategoryStats(categoryId: string): Promise<CategoryStat
  * submission at that amount (it was claimed first). Using `gt` here would
  * preview a rank one better than what publishing would actually produce.
  */
-export async function previewRankForBid(categoryId: string, bidAmountCents: number): Promise<number> {
+export async function previewRankForBid(categoryId: string, stateId: string, bidAmountCents: number): Promise<number> {
   const supabase = getSupabaseServerClient();
   const { count, error } = await supabase
     .from("listings")
     .select("id", { count: "exact", head: true })
     .eq("category_id", categoryId)
+    .eq("location_id", stateId)
     .eq("status", "published")
     .gte("bid_amount_cents", bidAmountCents);
 
@@ -152,6 +168,7 @@ export async function previewRankForBid(categoryId: string, bidAmountCents: numb
 
 export interface CreatePendingListingInput {
   categoryId: string;
+  stateId: string;
   providerName: string;
   pitch: string | null;
   destinationLink: string;
@@ -182,6 +199,7 @@ export async function createPendingListing(
     .from("listings")
     .insert({
       category_id: input.categoryId,
+      location_id: input.stateId,
       provider_name: input.providerName,
       pitch: input.pitch,
       destination_link: input.destinationLink,

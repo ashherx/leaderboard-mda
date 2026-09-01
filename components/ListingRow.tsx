@@ -94,9 +94,9 @@ export function ListingRow({
             <span className="min-w-0 flex-1 line-clamp-2 font-display text-base font-bold text-ink">
               {listing.provider_name}
             </span>
-            <span className="shrink-0 rounded-full bg-gold/12 px-1.5 py-0.5 text-[10px] font-medium text-ink">
+            {/* <span className="shrink-0 rounded-full bg-gold/12 px-1.5 py-0.5 text-[10px] font-medium text-ink">
               Sponsored
-            </span>
+            </span> */}
             {listing.is_verified && (
               <span className="shrink-0 rounded-full bg-green/8 px-1.5 py-0.5 text-[10px] font-medium text-green">
                 Verified

@@ -11,9 +11,11 @@ import Link from "next/link";
 export function CategoryTabs({
   categories,
   selectedSlug,
+  stateSlug,
 }: {
   categories: { slug: string; name: string }[];
   selectedSlug: string;
+  stateSlug: string;
 }) {
   return (
     <nav aria-label="Service categories" className="-mx-4 overflow-x-auto border-b border-border px-4">
@@ -27,7 +29,7 @@ export function CategoryTabs({
           return (
             <Link
               key={category.slug}
-              href={category.slug === "all" ? "/" : `/categories/${category.slug}`}
+              href={category.slug === "all" ? `/${stateSlug}` : `/${stateSlug}/${category.slug}`}
               aria-current={isCurrent ? "page" : undefined}
               className={`shrink-0 whitespace-nowrap border-b-2 py-2 text-sm font-medium transition-colors ${
                 isCurrent ? "border-gold text-ink" : "border-transparent text-slate hover:text-ink"

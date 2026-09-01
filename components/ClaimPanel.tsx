@@ -10,12 +10,14 @@ const STEP_DOLLARS = 1;
 
 export function ClaimPanel({
   selectedSlug,
+  stateSlug,
   selectedCategoryName,
   pricing,
   categories,
   onSelectCategory,
 }: {
   selectedSlug: string;
+  stateSlug: string;
   selectedCategoryName: string;
   pricing: CategoryPricing;
   categories: { slug: string; name: string }[];
@@ -51,7 +53,9 @@ export function ClaimPanel({
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
-      fetch(`/api/categories/${selectedSlug}/preview-rank?bid=${bidDollars}`, { signal: controller.signal })
+      fetch(`/api/states/${stateSlug}/categories/${selectedSlug}/preview-rank?bid=${bidDollars}`, {
+        signal: controller.signal,
+      })
         .then((res) => res.json())
         .then((data) => {
           if (data.rank) setPreviewRank(data.rank);
@@ -65,13 +69,13 @@ export function ClaimPanel({
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [bidDollars, currentTopDollars, selectedSlug]);
+  }, [bidDollars, currentTopDollars, selectedSlug, stateSlug]);
 
   function adjust(delta: number) {
     setBidDollars((current) => Math.max(minDollars, current + delta));
   }
 
-  const claimHref = `/claim?category=${selectedSlug}&amount=${bidDollars}${link ? `&link=${encodeURIComponent(link)}` : ""}`;
+  const claimHref = `/claim?state=${stateSlug}&category=${selectedSlug}&amount=${bidDollars}${link ? `&link=${encodeURIComponent(link)}` : ""}`;
 
   return (
     <div className="text-center">

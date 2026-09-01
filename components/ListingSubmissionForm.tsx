@@ -18,11 +18,13 @@ function looksLikeFetchableUrl(value: string): boolean {
 
 export function ListingSubmissionForm({
   categorySlug,
+  stateSlug,
   minBidDollars,
   initialBidDollars,
   initialDestinationLink,
 }: {
   categorySlug: string;
+  stateSlug: string;
   minBidDollars: number;
   initialBidDollars: number;
   initialDestinationLink?: string;
@@ -80,6 +82,7 @@ export function ListingSubmissionForm({
 
     const formData = new FormData(e.currentTarget);
     formData.set("categorySlug", categorySlug);
+    formData.set("stateSlug", stateSlug);
     // Only carry the auto-fetched favicon through if the visitor hasn't
     // chosen their own file - the file input (if filled) wins server-side
     // regardless, but no need to send both.

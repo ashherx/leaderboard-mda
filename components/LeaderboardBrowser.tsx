@@ -11,6 +11,7 @@ import { ALL_CATEGORIES_NAME, ALL_CATEGORIES_SLUG } from "@/lib/all-categories";
 
 export function LeaderboardBrowser({
   categories,
+  stateSlug,
   initialSlug,
   initialData,
   initialClaimSlug,
@@ -18,6 +19,7 @@ export function LeaderboardBrowser({
   statsPill,
 }: {
   categories: Category[];
+  stateSlug: string;
   initialSlug: string;
   initialData: CategoryBrowseData;
   initialClaimSlug: string;
@@ -36,7 +38,7 @@ export function LeaderboardBrowser({
     { slug: ALL_CATEGORIES_SLUG, name: ALL_CATEGORIES_NAME },
     ...categories.map(({ slug, name }) => ({ slug, name })),
   ];
-  const basePath = isAll ? "/" : `/categories/${initialSlug}`;
+  const basePath = isAll ? `/${stateSlug}` : `/${stateSlug}/${initialSlug}`;
 
   return (
     <>
@@ -49,13 +51,14 @@ export function LeaderboardBrowser({
       <div className="mt-8">
         <ClaimPanelRouter
           categories={categories}
+          stateSlug={stateSlug}
           selectedSlug={initialClaimSlug}
           pricing={initialClaimPricing}
         />
       </div>
 
       <div className="mt-8">
-        <CategoryTabs categories={tabCategories} selectedSlug={initialSlug} />
+        <CategoryTabs categories={tabCategories} selectedSlug={initialSlug} stateSlug={stateSlug} />
       </div>
 
       {!isAll && (
