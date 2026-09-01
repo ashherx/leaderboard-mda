@@ -21,7 +21,7 @@ export async function SiteHeader({
   return (
     <header className="border-b border-border">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-end gap-2">
           <Link href="/" className="flex items-end gap-2">
             <span className="relative h-7 w-7 shrink-0 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
