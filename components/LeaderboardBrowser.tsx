@@ -69,12 +69,10 @@ export function LeaderboardBrowser({
         <CategoryTabs categories={tabCategories} selectedSlug={initialSlug} stateSlug={stateSlug} />
       </div>
 
-      {!isAll && (
-        <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <TrendingPanel trending={initialData.trending} />
-          <LatestActivityPanel activity={initialData.latestActivity} />
-        </div>
-      )}
+      <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <TrendingPanel trending={initialData.trending} />
+        <LatestActivityPanel activity={initialData.latestActivity} />
+      </div>
 
       <div>
         <div className="mt-10 flex items-baseline justify-between">

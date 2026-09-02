@@ -10,7 +10,7 @@ export function LatestActivityPanel({ activity }: { activity: ActivityItem[] }) 
         Latest activity
       </p>
       {activity.length === 0 ? (
-        <p className="mt-2 text-xs text-slate">No claims yet in this category.</p>
+        <p className="mt-2 text-xs text-slate">No recent claims yet.</p>
       ) : (
         <ul className="mt-1 divide-y divide-border">
           {activity.map((item, i) => (

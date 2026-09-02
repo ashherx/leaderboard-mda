@@ -102,11 +102,6 @@ export function ListingRow({
                 Verified
               </span>
             )}
-            {categoryName && (
-              <span className="shrink-0 rounded-full bg-canvas px-1.5 py-0.5 text-[10px] font-medium text-slate">
-                {categoryName}
-              </span>
-            )}
           </div>
           {listing.pitch && <p className="mt-0.5 line-clamp-2 text-sm text-slate">{listing.pitch}</p>}
 
@@ -143,11 +138,19 @@ export function ListingRow({
           </p>
         </div>
 
-        <span
-          className={`shrink-0 font-mono text-xl font-bold ${isTopThree ? PRICE_TEXT_STYLES[listing.rank] : "text-ink"}`}
-        >
-          {formatCentsAsDollars(listing.bid_amount_cents)}
-        </span>
+        {/* Keep the All-board category badge and bid in one top-aligned
+            group. That way a long provider name can wrap without pulling
+            the badge away from its associated bid amount. */}
+        <div className="flex shrink-0 items-start gap-2">
+          {categoryName && (
+            <span className="rounded-full bg-canvas px-1.5 py-0.5 text-[10px] font-medium text-slate">
+              {categoryName}
+            </span>
+          )}
+          <span className={`font-mono text-xl font-bold leading-none ${isTopThree ? PRICE_TEXT_STYLES[listing.rank] : "text-ink"}`}>
+            {formatCentsAsDollars(listing.bid_amount_cents)}
+          </span>
+        </div>
       </ListingOutboundLink>
 
       {/* Sibling of the outbound link above, never nested inside it - see
