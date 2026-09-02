@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CaretDown, Check } from "@phosphor-icons/react";
+import { useLeaderboardNavigation } from "@/components/LeaderboardNavigation";
 
 /**
  * Header-level state switcher - only rendered by SiteHeader when 2+ states
@@ -29,6 +30,7 @@ export function StateSwitcher({
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const current = states.find((s) => s.slug === currentSlug);
+  const { startNavigation } = useLeaderboardNavigation();
 
   useEffect(() => {
     if (!open) return;
@@ -50,6 +52,8 @@ export function StateSwitcher({
 
   function selectState(slug: string) {
     setOpen(false);
+    if (slug === currentSlug) return;
+    startNavigation();
     router.push(currentCategorySlug ? `/${slug}/${currentCategorySlug}` : `/${slug}`);
   }
 

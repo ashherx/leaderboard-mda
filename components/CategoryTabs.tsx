@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLeaderboardNavigation } from "@/components/LeaderboardNavigation";
 
 /**
  * Every category is its own separate ranking (mixing bids across categories
@@ -17,6 +20,8 @@ export function CategoryTabs({
   selectedSlug: string;
   stateSlug: string;
 }) {
+  const { startNavigation } = useLeaderboardNavigation();
+
   return (
     <nav aria-label="Service categories" className="-mx-4 overflow-x-auto border-b border-border px-4">
       {/* w-max + min-w-full: centers the row when it's narrower than the nav
@@ -31,6 +36,18 @@ export function CategoryTabs({
               key={category.slug}
               href={category.slug === "all" ? `/${stateSlug}` : `/${stateSlug}/${category.slug}`}
               aria-current={isCurrent ? "page" : undefined}
+              onClick={(event) => {
+                if (
+                  !isCurrent &&
+                  event.button === 0 &&
+                  !event.metaKey &&
+                  !event.ctrlKey &&
+                  !event.shiftKey &&
+                  !event.altKey
+                ) {
+                  startNavigation();
+                }
+              }}
               className={`shrink-0 whitespace-nowrap border-b-2 py-2 text-sm font-medium transition-colors ${
                 isCurrent ? "border-gold text-ink" : "border-transparent text-slate hover:text-ink"
               }`}

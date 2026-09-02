@@ -10,6 +10,7 @@ import {
   SOCIAL_TITLE,
 } from "@/lib/site";
 import { absoluteUrl, serializeJsonLd, SITE_URL } from "@/lib/seo";
+import { LeaderboardNavigationProvider } from "@/components/LeaderboardNavigation";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -84,7 +85,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
         />
-        {children}
+        <LeaderboardNavigationProvider>{children}</LeaderboardNavigationProvider>
         <Analytics />
       </body>
     </html>
